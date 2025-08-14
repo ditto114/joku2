@@ -1,0 +1,79 @@
+{
+  "prices": {
+    "firstSecond": "800",
+    "third": "600",
+    "skillbook1": "1300/300",
+    "skillbook2": "900/200"
+  },
+  "reservations": {
+    "turn1": {
+      "first": {
+        "customer": "문차코",
+        "incentiveMember": "알류미늄",
+        "deposit": 100
+      },
+      "second": {
+        "customer": "망차코",
+        "incentiveMember": "알류미늄",
+        "deposit": 100
+      },
+      "third": {
+        "customer": "GO라LI",
+        "incentiveMember": "알류미늄",
+        "deposit": 0
+      }
+    },
+    "turn2": {
+      "first": {
+        "customer": "썬콜도건",
+        "incentiveMember": "알류미늄",
+        "deposit": 100
+      },
+      "second": {
+        "customer": "꿀소",
+        "incentiveMember": "알류미늄",
+        "deposit": 100
+      },
+      "third": {
+        "customer": "-",
+        "incentiveMember": "-",
+        "deposit": 0
+      }
+    },
+    "skillbook": {
+      "customer": "-",
+      "incentiveMember": "-",
+      "deposit": 0,
+      "skillbookName": "-"
+    },
+    "skillbookNoLying": {
+      "customer": "-",
+      "incentiveMember": "-",
+      "deposit": 0,
+      "skillbookName": "-"
+    },
+    "skillbook1": {
+      "customer": "-",
+      "incentiveMember": "-",
+      "deposit": 0,
+      "skillbookName": "-"
+    },
+    "skillbook2": {
+      "customer": "a쌀숍a",
+      "incentiveMember": "롱기눅스",
+      "deposit": 0,
+      "skillbookName": "엔레"
+    },
+    "enreEat": []
+  },
+  "departureTimes": {
+    "turn1": {
+      "hour": 20,
+      "minute": 45
+    },
+    "turn2": {
+      "hour": 21,
+      "minute": 35
+    }
+  }
+}
