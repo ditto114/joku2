@@ -7,7 +7,7 @@ import { readData } from './database.js';
 export async function createNewUserMenu() {
     const embed = new EmbedBuilder()
         .setTitle('🎉 조쿠공대 신규 예약')
-        .setDescription('조쿠공대를 찾아주셔서 진심으로 감사드립니다.\n아래 메뉴에서 순번을 선택해 주신 뒤, 예약 버튼을 클릭해주세요.')
+        .setDescription('조쿠공대를 찾아주셔서 감사드립니다.\n아래 메뉴에서 순번을 선택해 주신 뒤, 예약 버튼을 클릭해주세요.')
         .setColor('#00ff00');
 
     // 데이터베이스에서 현재 예약 상태 확인
