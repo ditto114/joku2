@@ -1,3 +1,4 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 // nicknameService.js
 import { CONFIG } from './config.js';
 import { validators, sendToChannel, withErrorHandling } from './utils.js';
@@ -107,7 +108,7 @@ export const sendNewMemberMessage = withErrorHandling(async (client, nickname) =
         }
     }
 
-    const message = `${currentTime} 📢 신규 가입 알림! 👤**${nickname}** (구인완료 버튼 클릭해주세요)`;
+    const message = `${currentTime} 📢 신규 가입 알림! 👤**${nickname}** `;
     return await sendToChannel(client, CONFIG.CHANNELS.MANAGEMENT, message);
 });
 
@@ -119,10 +120,17 @@ export const sendWelcomePrivateMessage = withErrorHandling(async (interaction) =
 
 💬 **도어 운영 공지 및 질문 답변 등등은 https://discord.com/channels/1378989621987508244/1384111491392868402 에서 공지하고 있으니 필요하신 분은 확인 부탁드립니다.**`;
 
-    return await interaction.followUp({
-        content: welcomeMessage,
+    return await interaction.followUp({ components: [
+  new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('recruit_complete_new_user:' + (botMember?.id ?? interaction?.member?.id ?? interaction?.user?.id))
+      .setLabel('구인완료')
+      .setStyle(ButtonStyle.Primary)
+  )
+],
+content: welcomeMessage,
         ephemeral: true
-    });
+     });
 });
 
 // 에러 메시지 매핑

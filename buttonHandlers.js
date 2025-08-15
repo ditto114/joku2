@@ -384,3 +384,37 @@ function createReservationModal(position) {
     modal.addComponents(...rows);
     return modal;
 }
+
+/** Fallback handler (route this in your index.js if needed)
+import { handleRecruitCompleteNewUserButton } from './buttonHandlers.js'
+client.on('interactionCreate', (i) => {
+  if (i.isButton() && i.customId.startsWith('recruit_complete_new_user:')) handleRecruitCompleteNewUserButton(i);
+});
+*/
+export async function handleRecruitCompleteNewUserButton(interaction) {
+  try {
+    if (!interaction?.guild) return;
+    const targetId = interaction.customId.split(':')[1];
+    let member = null;
+    try { member = await interaction.guild.members.fetch(targetId); } catch {}
+    const displayName = member?.nickname ?? member?.user?.globalName ?? member?.user?.username ?? '';
+
+    const modal = new ModalBuilder()
+      .setCustomId('recruit_complete_new_user_modal')
+      .setTitle('구인 완료');
+
+    const nicknameInput = new TextInputBuilder()
+      .setCustomId('customer_nickname')
+      .setLabel('손님 닉네임')
+      .setStyle(TextInputStyle.Short)
+      .setRequired(true);
+
+    if (displayName) nicknameInput.setValue(displayName);
+
+    modal.addComponents(new ActionRowBuilder().addComponents(nicknameInput));
+
+    await interaction.showModal(modal);
+  } catch (e) {
+    console.error('recruit_complete_new_user button error:', e);
+  }
+}
