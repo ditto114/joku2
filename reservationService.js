@@ -373,7 +373,8 @@ export const getReservationStatus = withErrorHandling(async () => {
                 : ''
         },
         enreEat: data.reservations.enreEat || [],
-        prices: data.prices
+        prices: data.prices,
+        departureTimes: data.departureTimes
     };
 });
 

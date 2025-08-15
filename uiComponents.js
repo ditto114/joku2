@@ -211,19 +211,27 @@ export function createTableManageMenu() {
 
 // 예약현황 임베드 생성
 export function createReservationStatusEmbed(reservationData, enreCustomers) {
-    const { turn1, turn2, skillbook1, skillbook2, prices } = reservationData;
+    const { turn1, turn2, skillbook1, skillbook2, prices, departureTimes } = reservationData;
 
+    const fmt = (t) => {
+        if (!t || t.hour === undefined || t.minute === undefined) return '--:--';
+        const h = String(t.hour).padStart(2, '0');
+        const m = String(t.minute).padStart(2, '0');
+        return `${h}:${m}`;
+    };
+    const t1 = departureTimes?.turn1;
+    const t2 = departureTimes?.turn2;
     const embed = new EmbedBuilder()
         .setTitle('📋 현재 예약 현황')
         .setColor('#0099ff')
         .addFields(
             {
-                name: '🔸 1트',
+                name: `🔸 1트 (${fmt(t1)})`,
                 value: `**1순:** ${turn1.first || '구인중'}\n**2순:** ${turn1.second || '구인중'}\n**3순:** ${turn1.third || '구인중'}`,
                 inline: true
             },
             {
-                name: '🔹 2트',
+                name: `🔹 2트 (${fmt(t2)})`,
                 value: `**1순:** ${turn2.first || '구인중'}\n**2순:** ${turn2.second || '구인중'}\n**3순:** ${turn2.third || '구인중'}`,
                 inline: true
             },
