@@ -21,6 +21,9 @@ import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from
 
 // 버튼 상호작용 처리
 export const handleButtonInteractions = withErrorHandling(async (interaction) => {
+    if (interaction.customId?.startsWith('recruit_complete_new_user:')) {
+        return await handleRecruitCompleteNewUserButton(interaction);
+    }
     switch (interaction.customId) {
         case 'execute_reset':
             await handleExecuteReset(interaction);
@@ -393,11 +396,13 @@ client.on('interactionCreate', (i) => {
 */
 export async function handleRecruitCompleteNewUserButton(interaction) {
   try {
-    if (!interaction?.guild) return;
+    // allow in DMs too (no guild guard)
     const targetId = interaction.customId.split(':')[1];
     let member = null;
-    try { member = await interaction.guild.members.fetch(targetId); } catch {}
-    const displayName = member?.nickname ?? member?.user?.globalName ?? member?.user?.username ?? '';
+    if (interaction.guild) {
+        try { member = await interaction.guild.members.fetch(targetId); } catch {}
+    }
+    const displayName = member?.nickname ?? member?.user?.globalName ?? member?.user?.username ?? (interaction.user?.globalName ?? interaction.user?.username ?? '');
 
     const modal = new ModalBuilder()
       .setCustomId('recruit_complete_new_user_modal')

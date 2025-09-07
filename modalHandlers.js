@@ -84,6 +84,9 @@ async function handleNewUserModal(interaction) {
     const nickname = interaction.fields.getTextInputValue('nickname_input');
     const userId = interaction.user.id;
 
+    // 모달은 시작 즉시 에페메랄 지연 응답
+    await interaction.deferReply({ ephemeral: true });
+
     try {
         // position 매핑 (트스북/어콤북은 동일하게 'skillbook1'으로 처리)
         let mappedPosition = selectedPosition;
@@ -96,22 +99,21 @@ async function handleNewUserModal(interaction) {
         // 역할 부여
         await assignGuestRole(interaction.member);
 
-        // 메시지 전송
+        // 신규 손님 안내 메시지(공지 채널 등)
         await sendNewMemberMessage(interaction.client, finalNickname);
 
-        // 상호작용 완료 처리 (메시지 없이)
-        await interaction.deferUpdate();
-
-        // ⭐ 새로 추가: 개인 메시지 전송
+        // 환영 DM (실패 시 에페메랄로 대체됨)
         await sendWelcomePrivateMessage(interaction);
 
         // 선택 정보 삭제
         const { globalState } = await import('./memoryManager.js');
         globalState.removeUserSelection(userId);
 
+        // 응답 마무리
+        await interaction.editReply('✅ 닉네임/역할 적용 완료! 환영 안내를 전송했습니다.');
     } catch (error) {
         const errorMessage = getErrorMessage(error);
-        await interaction.reply({ content: errorMessage, ephemeral: true });
+        await interaction.editReply(errorMessage);
     }
 }
 
