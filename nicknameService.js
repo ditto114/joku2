@@ -115,33 +115,16 @@ export const sendNewMemberMessage = withErrorHandling(async (client, nickname) =
 export const sendWelcomePrivateMessage = withErrorHandling(async (interaction) => {
     const welcomeMessage = `✅ **예약이 완료되었습니다.**
 
-📞 **출발시간 30분 전부터는 "손님대기방" 통화방에 꼭 참가 부탁드립니다.**
-(마이크는 끄고 듣기는 켜주세요)
+📞 **출발시간 30분 전 부터는 "손님대기방" 통화방에 꼭 참가 부탁드립니다.** 
+   (마이크는 꺼주시되 듣기는 켜주세요!!)
 
-💬 **운영 공지/FAQ 채널도 확인해 주세요.**`;
+💬 **도어 운영 공지 및 질문 답변 등등은 https://discord.com/channels/1378989621987508244/1384111491392868402 에서 공지하고 있으니 필요하신 분은 확인 부탁드립니다.**`;
 
-    const components = [
-        new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`recruit_complete_new_user:${interaction.user.id}`)
-                .setLabel('구인완료')
-                .setStyle(ButtonStyle.Primary)
-        )
-    ];
-
-    // 1) DM으로 전송 시도
-    try {
-        await interaction.user.send({ content: welcomeMessage, components });
-        return;
-    } catch (_) {
-        // 2) DM이 불가한 경우: 길드에서 에페메랄로 안내
-        const payload = { content: welcomeMessage, components, ephemeral: true };
-        if (interaction.deferred || interaction.replied) {
-            await interaction.followUp(payload);
-        } else {
-            await interaction.reply(payload);
-        }
-    }
+    return await interaction.followUp({ components: [
+],
+content: welcomeMessage,
+        ephemeral: true
+     });
 });
 
 // 에러 메시지 매핑
