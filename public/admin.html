@@ -177,6 +177,38 @@
             gap: 18px;
         }
 
+        /* Legacy slot styles kept for backwards compatibility with scripts that still call renderSlot */
+        .slot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slot {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 10px 14px;
+            border-radius: 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .slot-label {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .slot-value {
+            font-weight: 600;
+            color: #4338ca;
+        }
+
+        .slot-value.empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
         .turn-section.turn2 {
             background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
             border-color: rgba(168, 85, 247, 0.25);
@@ -1062,6 +1094,18 @@
             </button>`;
         }
 
+        // Legacy helper retained to prevent runtime errors in cached scripts expecting renderSlot.
+        function renderSlot(label, value) {
+            const slotLabel = escapeHtml(label ?? '');
+            const rawValue = typeof value === 'string' ? value.trim() : '';
+            const empty = !rawValue;
+            const slotValue = escapeHtml(empty ? '구인중' : rawValue);
+            return `<div class="slot">` +
+                `<span class="slot-label">${slotLabel}</span>` +
+                `<span class="slot-value ${empty ? 'empty' : ''}">${slotValue}</span>` +
+            `</div>`;
+        }
+
         const columnOrder = [
             { key: 'first', heading: '1순' },
             { key: 'second', heading: '2순' },
@@ -1265,34 +1309,6 @@
                 <div class="extra-title">${title}</div>
                 <div class="extra-content ${isEmpty ? 'empty' : ''}">${display}</div>
                 ${name}
-            </div>`;
-        }
-
-        function renderTurnSection(label, gearKey, time, data = {}, extraClass = '') {
-            const slots = data || {};
-            return `<section class="turn-section ${extraClass}">
-                <div class="turn-header">
-                    <div class="turn-title">
-                        <span>${label}</span>
-                        <span class="turn-time">${fmtTime(time)}</span>
-                    </div>
-                    ${gearBtn(gearKey)}
-                </div>
-                <div class="slot-list">
-                    ${renderSlot('1순', slots.first)}
-                    ${renderSlot('2순', slots.second)}
-                    ${renderSlot('3순', slots.third)}
-                </div>
-            </section>`;
-        }
-
-        function renderExtraCard(title, rawValue, extraClass = '') {
-            const str = rawValue == null ? '' : String(rawValue).trim();
-            const isEmpty = !str;
-            const display = isEmpty ? '구인중' : str;
-            return `<div class="extra-card ${extraClass}">
-                <div class="extra-title">${title}</div>
-                <div class="extra-content ${isEmpty ? 'empty' : ''}">${display}</div>
             </div>`;
         }
 
