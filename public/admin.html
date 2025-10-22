@@ -174,7 +174,7 @@
             border-radius: 16px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 18px;
         }
 
         .turn-section.turn2 {
@@ -237,41 +237,116 @@
             color: #6b7280;
         }
 
-        .slot-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+        .table-wrapper {
+            overflow-x: auto;
         }
 
-        .slot {
+        .reservation-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 14px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+
+        .reservation-table thead {
+            background: rgba(59, 130, 246, 0.12);
+        }
+
+        .reservation-table th,
+        .reservation-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .reservation-table th[scope="row"] {
+            background: rgba(148, 163, 184, 0.12);
+            font-weight: 600;
+            text-align: left;
+            color: #1f2937;
+            min-width: 88px;
+        }
+
+        .reservation-table td {
+            min-width: 110px;
+        }
+
+        .cell-empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .cell-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .cell-sub {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #6366f1;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .cell-stack {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            min-height: 72px;
+            align-items: center;
         }
 
-        .slot-label {
+        .loot-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-weight: 600;
-            color: #475569;
+            color: #2563eb;
+        }
+
+        .loot-mark input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+        }
+
+        .loot-mark.is-disabled {
+            opacity: 0.45;
+        }
+
+        .reservation-table button.copy-btn {
+            padding: 6px 10px;
             font-size: 12px;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.12);
+            color: #3730a3;
         }
 
-        .slot-value {
-            color: #111827;
-            font-size: 15px;
+        .reservation-table button.copy-btn:hover:not([disabled]) {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .reservation-table button.copy-btn.copied {
+            background: rgba(34, 197, 94, 0.18);
+            border-color: rgba(34, 197, 94, 0.45);
+            color: #166534;
+        }
+
+        .reservation-table button.copy-btn[disabled] {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .reservation-table .deposit {
+            font-variant-numeric: tabular-nums;
             font-weight: 600;
-        }
-
-        .slot-value.empty {
-            color: #94a3b8;
-            font-style: italic;
-            font-weight: 500;
+            color: #065f46;
         }
 
         .extra-grid {
@@ -790,6 +865,39 @@
         const setPwd = v => sessionStorage.setItem(PWD_KEY, v || '');
         const clearPwd = () => sessionStorage.removeItem(PWD_KEY);
         const authHeaders = () => ({ 'x-admin-password': getPwd() });
+
+        const LOOT_STORAGE_KEY = 'joku_admin_loot_state_v1';
+
+        function withStorage(fn, fallback) {
+            try { return fn(); }
+            catch { return fallback; }
+        }
+
+        let lootState = withStorage(() => JSON.parse(localStorage.getItem(LOOT_STORAGE_KEY) || '{}'), {});
+
+        function saveLootState() {
+            withStorage(() => localStorage.setItem(LOOT_STORAGE_KEY, JSON.stringify(lootState)), null);
+        }
+
+        const escapeHtml = (str = '') => String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const escapeAttr = (str = '') => escapeHtml(str).replace(/`/g, '&#96;');
+
+        const formatDepositValue = (detail = {}) => {
+            if (!detail.hasReservation) return '<span class="cell-empty">-</span>';
+            const value = detail.deposit ?? detail.rawDeposit;
+            if (value == null || value === '') return '<span class="cell-empty">-</span>';
+            const num = Number(value);
+            if (Number.isNaN(num)) {
+                return `<span class="deposit">${escapeHtml(value)}</span>`;
+            }
+            return `<span class="deposit">${num.toLocaleString('ko-KR')}</span>`;
+        };
         // ── "현재 예약 현황" 카드 요소 찾기 ───────────────────────────────
         function findReservationCard() {
             const byId = document.getElementById('reservationStatusCard');
@@ -954,11 +1062,209 @@
             </button>`;
         }
 
-        function renderSlot(label, value) {
-            const isEmpty = !value || !String(value).trim();
-            return `<div class="slot">
-                <span class="slot-label">${label}</span>
-                <span class="slot-value ${isEmpty ? 'empty' : ''}">${isEmpty ? '구인중' : value}</span>
+        const columnOrder = [
+            { key: 'first', heading: '1순' },
+            { key: 'second', heading: '2순' },
+            { key: 'third', heading: '3순' },
+            { key: 'skillbook1', heading: '스킬북1' },
+            { key: 'skillbook2', heading: '스킬북2' }
+        ];
+
+        const rowOrder = [
+            { key: 'nickname', label: '닉네임' },
+            { key: 'incentive', label: '인센' },
+            { key: 'deposit', label: '예약금' },
+            { key: 'loot', label: '득 여부' },
+            { key: 'exchange', label: '교환' },
+            { key: 'party', label: '파티' }
+        ];
+
+        function renderReservationCell(rowKey, column) {
+            const detail = column.detail || {};
+            const hasReservation = !!detail.hasReservation;
+            const slotId = column.slotId;
+
+            if (rowKey === 'nickname') {
+                if (!hasReservation) {
+                    const bookName = detail.skillbookName ? `<span class="cell-sub">${escapeHtml(detail.skillbookName)}</span>` : '';
+                    return `<div class="cell-stack"><span class="cell-empty">구인중</span>${bookName}</div>`;
+                }
+                const name = `<span class="cell-value">${escapeHtml(detail.nickname)}</span>`;
+                const bookName = detail.skillbookName ? `<span class="cell-sub">${escapeHtml(detail.skillbookName)}</span>` : '';
+                return `<div class="cell-stack">${name}${bookName}</div>`;
+            }
+
+            if (rowKey === 'incentive') {
+                if (!hasReservation || !detail.incentive) {
+                    return '<span class="cell-empty">-</span>';
+                }
+                return `<span class="cell-value">${escapeHtml(detail.incentive)}</span>`;
+            }
+
+            if (rowKey === 'deposit') {
+                return formatDepositValue(detail);
+            }
+
+            if (rowKey === 'loot') {
+                const disabled = !hasReservation;
+                const checked = !disabled && lootState[slotId];
+                const classes = ['loot-mark'];
+                if (disabled) classes.push('is-disabled');
+                return `<label class="${classes.join(' ')}">
+                    <input type="checkbox" ${disabled ? 'disabled' : ''} data-loot-slot="${escapeAttr(slotId)}" data-slot-active="${disabled ? '0' : '1'}" ${checked ? 'checked' : ''} />
+                    <span>획득</span>
+                </label>`;
+            }
+
+            if (rowKey === 'exchange' || rowKey === 'party') {
+                if (!hasReservation) {
+                    return '<span class="cell-empty">-</span>';
+                }
+                const prefix = rowKey === 'exchange' ? '/교환 ' : '/파티초대 ';
+                const label = rowKey === 'exchange' ? '교환' : '파티';
+                const text = `${prefix}${detail.nickname}`;
+                return `<button type="button" class="copy-btn" data-copy-text="${escapeAttr(text)}" data-copy-label="${label}" data-slot="${escapeAttr(slotId)}">${label}</button>`;
+            }
+
+            return '<span class="cell-empty">-</span>';
+        }
+
+        function renderTurnSection(label, gearKey, time, detail = {}, extraClass = '', turnKey = '', skillbookDetail = {}) {
+            const columns = columnOrder.map(col => {
+                const slotId = col.key.startsWith('skillbook') ? col.key : `${turnKey}-${col.key}`;
+                const baseDetail = col.key.startsWith('skillbook') ? skillbookDetail[col.key] : detail[col.key];
+                return {
+                    ...col,
+                    slotId,
+                    detail: baseDetail || {}
+                };
+            });
+
+            const headerRow = columns.map(col => `<th scope="col">${col.heading}</th>`).join('');
+            const bodyRows = rowOrder.map(row => {
+                const cells = columns.map(col => `<td>${renderReservationCell(row.key, col)}</td>`).join('');
+                return `<tr><th scope="row">${row.label}</th>${cells}</tr>`;
+            }).join('');
+
+            return `<section class="turn-section ${extraClass}">
+                <div class="turn-header">
+                    <div class="turn-title">
+                        <span>${label}</span>
+                        <span class="turn-time">${fmtTime(time)}</span>
+                    </div>
+                    ${gearBtn(gearKey)}
+                </div>
+                <div class="table-wrapper">
+                    <table class="reservation-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">항목</th>
+                                ${headerRow}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bodyRows}
+                        </tbody>
+                    </table>
+                </div>
+            </section>`;
+        }
+
+        async function copyTextToClipboard(text) {
+            if (!text) return false;
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const temp = document.createElement('textarea');
+                    temp.value = text;
+                    temp.style.position = 'fixed';
+                    temp.style.opacity = '0';
+                    document.body.appendChild(temp);
+                    temp.focus();
+                    temp.select();
+                    document.execCommand('copy');
+                    temp.remove();
+                }
+                return true;
+            } catch (err) {
+                console.error('clipboard error', err);
+                return false;
+            }
+        }
+
+        function attachCopyHandlers(root) {
+            root.querySelectorAll('button.copy-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (btn.disabled) return;
+                    const text = btn.getAttribute('data-copy-text');
+                    const label = btn.getAttribute('data-copy-label') || btn.textContent;
+                    const ok = await copyTextToClipboard(text);
+                    if (!ok) return;
+                    btn.textContent = '복사됨!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = label;
+                        btn.classList.remove('copied');
+                    }, 1200);
+                });
+            });
+        }
+
+        function applyLootState(root) {
+            const activeSlots = new Set();
+            root.querySelectorAll('[data-loot-slot]').forEach(input => {
+                const slot = input.getAttribute('data-loot-slot');
+                if (!slot) return;
+                const isActive = input.getAttribute('data-slot-active') === '1' && !input.disabled;
+                if (!isActive) {
+                    input.checked = false;
+                    if (lootState[slot]) delete lootState[slot];
+                    return;
+                }
+                activeSlots.add(slot);
+                input.checked = !!lootState[slot];
+            });
+            Object.keys(lootState).forEach(key => {
+                if (!activeSlots.has(key)) {
+                    delete lootState[key];
+                }
+            });
+            saveLootState();
+        }
+
+        function bindLootCheckboxes(root) {
+            root.querySelectorAll('[data-loot-slot]').forEach(input => {
+                input.addEventListener('change', () => {
+                    const slot = input.getAttribute('data-loot-slot');
+                    if (!slot) return;
+                    if (input.checked) {
+                        lootState[slot] = true;
+                    } else {
+                        delete lootState[slot];
+                    }
+                    saveLootState();
+                    root.querySelectorAll(`[data-loot-slot="${slot}"]`).forEach(other => {
+                        if (other === input) return;
+                        if (other.disabled) return;
+                        other.checked = input.checked;
+                    });
+                });
+            });
+        }
+
+        function renderExtraCard(title, data, extraClass = '') {
+            const isObject = data && typeof data === 'object';
+            const reservation = isObject ? data?.reservation : data;
+            const subtitle = isObject ? data?.name : '';
+            const str = reservation == null ? '' : String(reservation).trim();
+            const isEmpty = !str;
+            const display = isEmpty ? '구인중' : str;
+            const name = subtitle ? `<div class="cell-sub">${escapeHtml(subtitle)}</div>` : '';
+            return `<div class="extra-card ${extraClass}">
+                <div class="extra-title">${title}</div>
+                <div class="extra-content ${isEmpty ? 'empty' : ''}">${display}</div>
+                ${name}
             </div>`;
         }
 
@@ -995,8 +1301,8 @@
             const t2 = j?.departureTimes?.turn2;
             const turnRowHtml = `
                 <div class="turn-row">
-                    ${renderTurnSection('🔸 1트', 't1', t1, j?.turn1)}
-                    ${renderTurnSection('🔹 2트', 't2', t2, j?.turn2, 'turn2')}
+                    ${renderTurnSection('🔸 1트', 't1', t1, j?.turn1Details, '', 't1', j?.skillbookDetails)}
+                    ${renderTurnSection('🔹 2트', 't2', t2, j?.turn2Details, 'turn2', 't2', j?.skillbookDetails)}
                 </div>`;
 
             const sb1 = j?.skillbook1 ?? {};
@@ -1005,12 +1311,15 @@
 
             const extraHtml = `
                 <div class="extra-grid">
-                    ${renderExtraCard('📚 스킬북1', sb1.reservation)}
-                    ${renderExtraCard('📚 스킬북2', sb2.reservation, 'skill2')}
+                    ${renderExtraCard('📚 스킬북1', sb1)}
+                    ${renderExtraCard('📚 스킬북2', sb2, 'skill2')}
                     ${renderExtraCard('👼 엔레먹자', enre.length ? enre.join(', ') : '', 'enre')}
                 </div>`;
 
             statusBox.innerHTML = turnRowHtml + extraHtml;
+            attachCopyHandlers(statusBox);
+            applyLootState(statusBox);
+            bindLootCheckboxes(statusBox);
 
             $('p1').value = j?.prices?.firstSecond ?? '';
             $('p2').value = j?.prices?.third ?? '';
