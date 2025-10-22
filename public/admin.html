@@ -1106,7 +1106,7 @@
             `</div>`;
         }
 
-        const columnOrder = [
+        const slotOrder = [
             { key: 'first', heading: '1순' },
             { key: 'second', heading: '2순' },
             { key: 'third', heading: '3순' },
@@ -1174,7 +1174,7 @@
         }
 
         function renderTurnSection(label, gearKey, time, detail = {}, extraClass = '', turnKey = '', skillbookDetail = {}) {
-            const columns = columnOrder.map(col => {
+            const slots = slotOrder.map(col => {
                 const slotId = col.key.startsWith('skillbook') ? col.key : `${turnKey}-${col.key}`;
                 const baseDetail = col.key.startsWith('skillbook') ? skillbookDetail[col.key] : detail[col.key];
                 return {
@@ -1184,10 +1184,10 @@
                 };
             });
 
-            const headerRow = columns.map(col => `<th scope="col">${col.heading}</th>`).join('');
-            const bodyRows = rowOrder.map(row => {
-                const cells = columns.map(col => `<td>${renderReservationCell(row.key, col)}</td>`).join('');
-                return `<tr><th scope="row">${row.label}</th>${cells}</tr>`;
+            const headerRow = rowOrder.map(row => `<th scope="col">${row.label}</th>`).join('');
+            const bodyRows = slots.map(slot => {
+                const cells = rowOrder.map(row => `<td>${renderReservationCell(row.key, slot)}</td>`).join('');
+                return `<tr><th scope="row">${slot.heading}</th>${cells}</tr>`;
             }).join('');
 
             return `<section class="turn-section ${extraClass}">
@@ -1202,7 +1202,7 @@
                     <table class="reservation-table">
                         <thead>
                             <tr>
-                                <th scope="col">항목</th>
+                                <th scope="col">구분</th>
                                 ${headerRow}
                             </tr>
                         </thead>
