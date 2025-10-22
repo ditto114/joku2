@@ -1268,6 +1268,34 @@
             </div>`;
         }
 
+        function renderTurnSection(label, gearKey, time, data = {}, extraClass = '') {
+            const slots = data || {};
+            return `<section class="turn-section ${extraClass}">
+                <div class="turn-header">
+                    <div class="turn-title">
+                        <span>${label}</span>
+                        <span class="turn-time">${fmtTime(time)}</span>
+                    </div>
+                    ${gearBtn(gearKey)}
+                </div>
+                <div class="slot-list">
+                    ${renderSlot('1순', slots.first)}
+                    ${renderSlot('2순', slots.second)}
+                    ${renderSlot('3순', slots.third)}
+                </div>
+            </section>`;
+        }
+
+        function renderExtraCard(title, rawValue, extraClass = '') {
+            const str = rawValue == null ? '' : String(rawValue).trim();
+            const isEmpty = !str;
+            const display = isEmpty ? '구인중' : str;
+            return `<div class="extra-card ${extraClass}">
+                <div class="extra-title">${title}</div>
+                <div class="extra-content ${isEmpty ? 'empty' : ''}">${display}</div>
+            </div>`;
+        }
+
         function renderStatus(j) {
             const t1 = j?.departureTimes?.turn1;
             const t2 = j?.departureTimes?.turn2;
