@@ -109,8 +109,6 @@ async function handleNewUserModal(interaction) {
         const { globalState } = await import('./memoryManager.js');
         globalState.removeUserSelection(userId);
 
-        // 응답 마무리
-        await interaction.editReply('✅ 닉네임/역할 적용 완료! 환영 안내를 전송했습니다.');
     } catch (error) {
         const errorMessage = getErrorMessage(error);
         await interaction.editReply(errorMessage);

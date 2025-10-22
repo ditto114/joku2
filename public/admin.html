@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>조쿠공대 관리페이지</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px 32px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 로그인 게이트 */
+        #gate {
+            max-width: 480px;
+            margin: 80px auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        #gate h2 {
+            font-size: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        #gate .row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        #gate input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        #gate input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        #gateMsg {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* 메인 그리드 */
+        main {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        /* 예약 현황 */
+        .turn-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .turn-section.turn2 {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border-left-color: #a855f7;
+        }
+
+        .turn-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .turn-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .turn-time {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #3b82f6;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .turn2 .turn-time {
+            color: #a855f7;
+        }
+
+        .gear {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .gear:hover {
+            transform: rotate(45deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .gear svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+
+        .slot-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .slot {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .slot-label {
+            font-weight: 600;
+            color: #374151;
+            min-width: 50px;
+        }
+
+        .slot-value {
+            flex: 1;
+            color: #111827;
+        }
+
+        .slot-value.empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* 추가 섹션 */
+        .extra-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 16px;
+        }
+
+        .extra-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .extra-content {
+            color: #78350f;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+        }
+
+        /* 우측 컨트롤 패널 */
+        .control-panel {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* 입력 폼 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 60px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* 버튼 */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* 초기화 섹션 */
+        .reset-select {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .reset-select option {
+            padding: 8px;
+            border-radius: 6px;
+            margin: 2px 0;
+        }
+
+        .reset-select option:checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* 공대원 섹션 */
+        .members-section {
+            grid-column: 1 / -1;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .member-item:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            transform: translateX(4px);
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .member-job {
+            color: #6b7280;
+            font-size: 14px;
+            padding: 4px 12px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        /* 상태 메시지 */
+        .status-msg {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-msg.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-msg.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 모달 */
+        dialog {
+            border: none;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 90vw;
+            width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal {
+            padding: 32px;
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 로딩 애니메이션 */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        /* 헤더 행 배치 */
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-row">
+            <h1>🎮 조쿠공대 관리페이지</h1>
+            <div class="btn-group">
+                <button id="sendScreenshot" class="btn-secondary">🖼️ 화면 전송</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 로그인 게이트 -->
+    <section id="gate" class="hidden">
+        <h2>🔐 관리자 로그인</h2>
+        <div class="row">
+            <input id="pwd" type="password" placeholder="관리자 비밀번호를 입력하세요" />
+            <button id="loginBtn" class="btn-primary">접속</button>
+        </div>
+        <div id="gateMsg"></div>
+    </section>
+
+    <!-- 메인 컨텐츠 -->
+    <main id="app" class="hidden">
+        <!-- 좌측: 예약 현황 -->
+        <div>
+            <div class="card" id="reservationStatusCard">
+                <h2>🧑‍🤝‍🧑 현재 예약 현황</h2>
+                <div id="statusBox">
+                    <div class="status-msg">불러오는 중...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 컨트롤 패널 -->
+        <div class="control-panel">
+            <!-- 시세 변경 -->
+            <div class="card">
+                <h2>💰 시세 변경</h2>
+                <div class="form-group">
+                    <label>확투 (1순, 2순)</label>
+                    <div class="input-wrapper">
+                        <input id="p1" type="number" placeholder="1000" />
+                        <span class="input-suffix">골드</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>3순</label>
+                    <div class="input-wrapper">
+                        <input id="p2" type="number" placeholder="800" />
+                        <span class="input-suffix">골드</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>스킬북1</label>
+                    <div class="input-wrapper">
+                        <input id="p3" type="number" placeholder="1000" />
+                        <span class="input-suffix">골드</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>스킬북2</label>
+                    <div class="input-wrapper">
+                        <input id="p4" type="number" placeholder="300" />
+                        <span class="input-suffix">골드</span>
+                    </div>
+                </div>
+                <button id="savePrices" class="btn-primary btn-full">💾 시세 저장</button>
+                <div id="priceMsg" class="status-msg hidden"></div>
+            </div>
+
+            <!-- 초기화 -->
+            <div class="card">
+                <h2>🗑️ 초기화</h2>
+                <select id="resetSel" class="reset-select" multiple>
+                    <option value="turn1_first">1트 1순</option>
+                    <option value="turn1_second">1트 2순</option>
+                    <option value="turn1_third">1트 3순</option>
+                    <option value="turn2_first">2트 1순</option>
+                    <option value="turn2_second">2트 2순</option>
+                    <option value="turn2_third">2트 3순</option>
+                    <option value="skillbook1">스킬북1</option>
+                    <option value="skillbook2">스킬북2</option>
+                    <option value="enre_eat">엔레먹자</option>
+                </select>
+                <div class="btn-group">
+                    <button id="resetSome" class="btn-primary" style="flex:1;">선택 초기화</button>
+                    <button id="resetAll" class="btn-danger" style="flex:1;">모두 초기화</button>
+                </div>
+                <div id="resetMsg" class="status-msg hidden"></div>
+            </div>
+        </div>
+
+        <!-- 하단: 공대원 명단 -->
+        <div class="card members-section">
+            <h2>🛡️ 공대원 명단</h2>
+            <div class="btn-group" style="margin-bottom: 20px;">
+                <button id="mAdd" class="btn-primary">➕ 공대원 추가</button>
+                <button id="mDel" class="btn-danger">➖ 공대원 제거</button>
+                <button id="mReload" class="btn-secondary">🔄 새로고침</button>
+            </div>
+            <div id="mBox">
+                <div class="status-msg">불러오는 중...</div>
+            </div>
+            <div id="mMsg" class="status-msg hidden"></div>
+        </div>
+    </main>
+
+    <!-- 출발시간 변경 모달 -->
+    <dialog id="timeDialog">
+        <div class="modal">
+            <h3 id="timeTitle">⏰ 출발시간 변경</h3>
+            <div class="modal-grid">
+                <div class="form-group">
+                    <label>시 (0-23)</label>
+                    <input id="th" type="number" min="0" max="23" />
+                </div>
+                <div class="form-group">
+                    <label>분 (0-59)</label>
+                    <input id="tm" type="number" min="0" max="59" />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="timeCancel" class="btn-secondary">취소</button>
+                <button id="timeSave" class="btn-primary">저장</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const app = $('app'), gate = $('gate'), gateMsg = $('gateMsg');
+        const PWD_KEY = 'admin_password';
+        const getPwd = () => sessionStorage.getItem(PWD_KEY) || '';
+        const setPwd = v => sessionStorage.setItem(PWD_KEY, v || '');
+        const clearPwd = () => sessionStorage.removeItem(PWD_KEY);
+        const authHeaders = () => ({ 'x-admin-password': getPwd() });
+        // ── "현재 예약 현황" 카드 요소 찾기 ───────────────────────────────
+        function findReservationCard() {
+            const byId = document.getElementById('reservationStatusCard');
+            if (byId) return byId;
+            const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4'));
+            const h = headings.find(el => el.textContent.trim().includes('현재 예약 현황'));
+            if (!h) return null;
+            const candidates = [h.closest('.card'), h.closest('section'), h.closest('article'), h.parentElement].filter(Boolean);
+            return candidates[0] || null;
+        }
+
+        // ── 브라우저 화면 공유 기반 캡쳐(선택된 표면에서 대상 요소 영역만 크롭) ──
+        async function captureCardViaScreenShare(targetEl) {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { displaySurface: 'browser' },
+                audio: false
+            });
+            try {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.muted = true;
+                video.playsInline = true;
+                await video.play();
+                await new Promise(r => { if (video.readyState >= 2) r(); else video.onloadeddata = () => r(); });
+
+                const rect = targetEl.getBoundingClientRect();
+                const cssW = window.innerWidth;
+                const cssH = window.innerHeight;
+                const vidW = video.videoWidth;
+                const vidH = video.videoHeight;
+                const scaleX = vidW / cssW;
+                const scaleY = vidH / cssH;
+
+                const sx = Math.round(rect.left * scaleX);
+                const sy = Math.round(rect.top * scaleY);
+                const sw = Math.max(1, Math.round(rect.width * scaleX));
+                const sh = Math.max(1, Math.round(rect.height * scaleY));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = sw;
+                canvas.height = sh;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+
+                return canvas.toDataURL('image/png');
+            } finally {
+                stream.getTracks().forEach(t => t.stop());
+            }
+        }
+
+        // ── 화면 전송 버튼 설정 ──
+        (function setupScreenshotSender() {
+            const btn = document.getElementById('sendScreenshot');
+            if (!btn) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    if (!getPwd()) {
+                        showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                        return;
+                    }
+                    btn.disabled = true;
+                    const prev = btn.textContent;
+                    btn.textContent = '전송 준비중...';
+
+                    const targetEl = findReservationCard();
+                    if (!targetEl) throw new Error('캡쳐 대상(현재 예약 현황 카드)을 찾지 못했습니다. id="reservationStatusCard"를 추가해 주세요.');
+
+                    const dataUrl = await captureCardViaScreenShare(targetEl);
+
+                    btn.textContent = '업로드중...';
+                    const r = await fetch('/api/screenshot', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                        body: JSON.stringify({ image: dataUrl })
+                    });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok || !j?.ok) throw new Error(j?.error || '업로드 실패');
+
+                    btn.textContent = '✅ 전송 완료';
+                    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1200);
+                } catch (e) {
+                    alert('화면 전송 실패: ' + (e?.message || e));
+                    btn.disabled = false;
+                    btn.textContent = '🖼️ 화면 전송';
+                }
+            });
+        })();
+
+
+        async function jsonOrThrow(r) {
+            if (!r.ok) {
+                if (r.status === 401) { clearPwd(); showGate('❌ 인증 실패. 비밀번호를 다시 입력하세요.'); }
+                const t = await r.text().catch(() => '');
+                throw new Error(`HTTP ${r.status} ${r.statusText} | ${t.slice(0, 200)}`);
+            }
+            return r.json();
+        }
+
+        function showApp() { gate.classList.add('hidden'); app.classList.remove('hidden'); }
+        function showGate(msg = '') { app.classList.add('hidden'); gate.classList.remove('hidden'); gateMsg.textContent = msg; }
+
+        function showMsg(el, msg, type = '') {
+            el.textContent = msg;
+            el.classList.remove('hidden', 'success', 'error');
+            if (type) el.classList.add(type);
+        }
+
+        const statusBox = $('statusBox');
+        const mBox = $('mBox');
+
+        function fmtTime(t) {
+            if (!t) return '--:--';
+            const h = String(t.hour ?? '').padStart(2, '0');
+            const m = String(t.minute ?? '').padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function gearBtn(id) {
+            return `<button class="gear" data-gear="${id}" title="출발시간 수정">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6M1 12h6m6 0h6"/>
+                    <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24M4.93 19.07l4.24-4.24m5.66-5.66 4.24-4.24"/>
+                </svg>
+            </button>`;
+        }
+
+        function renderSlot(label, value) {
+            const isEmpty = !value || !String(value).trim();
+            return `<div class="slot">
+                <span class="slot-label">${label}</span>
+                <span class="slot-value ${isEmpty ? 'empty' : ''}">${isEmpty ? '구인중' : value}</span>
+            </div>`;
+        }
+
+        function renderStatus(j) {
+            const t1 = j?.departureTimes?.turn1;
+            const t2 = j?.departureTimes?.turn2;
+
+            const turn1Html = `
+                <div class="turn-section">
+                    <div class="turn-header">
+                        <div class="turn-title">
+                            <span>🔸 1트</span>
+                            <span class="turn-time">${fmtTime(t1)}</span>
+                        </div>
+                        ${gearBtn('t1')}
+                    </div>
+                    <div class="slot-list">
+                        ${renderSlot('1순', j?.turn1?.first)}
+                        ${renderSlot('2순', j?.turn1?.second)}
+                        ${renderSlot('3순', j?.turn1?.third)}
+                    </div>
+                </div>`;
+
+            const turn2Html = `
+                <div class="turn-section turn2">
+                    <div class="turn-header">
+                        <div class="turn-title">
+                            <span>🔹 2트</span>
+                            <span class="turn-time">${fmtTime(t2)}</span>
+                        </div>
+                        ${gearBtn('t2')}
+                    </div>
+                    <div class="slot-list">
+                        ${renderSlot('1순', j?.turn2?.first)}
+                        ${renderSlot('2순', j?.turn2?.second)}
+                        ${renderSlot('3순', j?.turn2?.third)}
+                    </div>
+                </div>`;
+
+            const sb1 = j?.skillbook1 ?? {};
+            const sb2 = j?.skillbook2 ?? {};
+            const enre = Array.isArray(j?.enreEat) ? j.enreEat : [];
+
+            const extraHtml = `
+                <div class="extra-section">
+                    <div class="extra-title">📚 스킬북1</div>
+                    <div class="extra-content">${sb1.reservation || '구인중'}</div>
+                </div>
+                <div class="extra-section">
+                    <div class="extra-title">📚 스킬북2</div>
+                    <div class="extra-content">${sb2.reservation || '구인중'}</div>
+                </div>
+                <div class="extra-section">
+                    <div class="extra-title">👼 엔레먹자</div>
+                    <div class="extra-content">${enre.length ? enre.join(', ') : '구인중'}</div>
+                </div>`;
+
+            statusBox.innerHTML = turn1Html + turn2Html + extraHtml;
+
+            $('p1').value = j?.prices?.firstSecond ?? '';
+            $('p2').value = j?.prices?.third ?? '';
+            $('p3').value = j?.prices?.skillbook1 ?? '';
+            $('p4').value = j?.prices?.skillbook2 ?? '';
+
+            statusBox.querySelectorAll('[data-gear]').forEach(btn => {
+                btn.onclick = () => openTimeModal(btn.getAttribute('data-gear'), j);
+            });
+
+            const members = Array.isArray(j?.guildMembers) ? j.guildMembers : [];
+            if (!members.length) {
+                mBox.innerHTML = '<div class="status-msg">등록된 공대원이 없습니다</div>';
+            } else {
+                mBox.innerHTML = members.map(m => `
+                    <div class="member-item">
+                        <div class="member-info">
+                            <span class="member-name">${m.nickname}</span>
+                            <span class="member-job">${m.job}</span>
+                        </div>
+                    </div>`).join('');
+            }
+        }
+
+        async function loadStatus() {
+            statusBox.innerHTML = '<div class="status-msg">불러오는 중...</div>';
+            try {
+                const r = await fetch('/api/status', { headers: authHeaders(), credentials: 'same-origin' });
+                const j = await jsonOrThrow(r);
+                renderStatus(j);
+            } catch (e) {
+                statusBox.innerHTML = `<div class="status-msg error">에러: ${e.message}</div>`;
+            }
+        }
+
+        $('savePrices').onclick = async () => {
+            const msg = $('priceMsg');
+            showMsg(msg, '저장 중...');
+            try {
+                const body = {
+                    firstSecond: $('p1').value,
+                    third: $('p2').value,
+                    skillbook1: $('p3').value,
+                    skillbook2: $('p4').value
+                };
+                const r = await fetch('/api/prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify(body),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                showMsg(msg, '✅ 시세가 저장되었습니다', 'success');
+            } catch (e) {
+                showMsg(msg, '❌ ' + e.message, 'error');
+            }
+        };
+
+        $('resetSome').onclick = async () => {
+            const msg = $('resetMsg');
+            showMsg(msg, '진행 중...');
+            try {
+                const items = Array.from($('resetSel').selectedOptions).map(o => o.value);
+                const r = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ items }),
+                    credentials: 'same-origin'
+                });
+                const j = await jsonOrThrow(r);
+                showMsg(msg, '✅ 초기화됨: ' + (j.resetItems?.join(', ') || '-'), 'success');
+            } catch (e) {
+                showMsg(msg, '❌ ' + e.message, 'error');
+            }
+        };
+
+        $('resetAll').onclick = async () => {
+            if (!confirm('정말 모든 예약을 초기화할까요?')) return;
+            const msg = $('resetMsg');
+            showMsg(msg, '진행 중...');
+            try {
+                const r = await fetch('/api/reset-all', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                showMsg(msg, '✅ 모든 예약이 초기화되었습니다', 'success');
+            } catch (e) {
+                showMsg(msg, '❌ ' + e.message, 'error');
+            }
+        };
+
+        $('mAdd').onclick = async () => {
+            const nickname = prompt('공대원 닉네임:');
+            if (!nickname) return;
+            const job = prompt('직업:');
+            if (!job) return;
+            const msg = $('mMsg');
+            showMsg(msg, '추가 중...');
+            try {
+                const r = await fetch('/api/members', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ nickname, job }),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                showMsg(msg, '✅ 공대원이 추가되었습니다', 'success');
+                loadStatus();
+            } catch (e) {
+                showMsg(msg, '❌ ' + e.message, 'error');
+            }
+        };
+
+        $('mDel').onclick = async () => {
+            const nickname = prompt('삭제할 닉네임:');
+            if (!nickname) return;
+            const msg = $('mMsg');
+            showMsg(msg, '삭제 중...');
+            try {
+                const r = await fetch('/api/members', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ nickname }),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                showMsg(msg, '✅ 공대원이 삭제되었습니다', 'success');
+                loadStatus();
+            } catch (e) {
+                showMsg(msg, '❌ ' + e.message, 'error');
+            }
+        };
+
+        $('mReload').onclick = loadStatus;
+
+        const timeDialog = $('timeDialog');
+        const th = $('th');
+        const tm = $('tm');
+        const timeTitle = $('timeTitle');
+        let editingTurn = null;
+
+        function openTimeModal(turnKey, snapshot) {
+            editingTurn = turnKey;
+            const target = (turnKey === 't1') ? snapshot?.departureTimes?.turn1 : snapshot?.departureTimes?.turn2;
+            timeTitle.textContent = (turnKey === 't1') ? '⏰ 출발시간 변경 - 1트' : '⏰ 출발시간 변경 - 2트';
+            th.value = target?.hour ?? '';
+            tm.value = target?.minute ?? '';
+            if (typeof timeDialog.showModal === 'function') {
+                timeDialog.showModal();
+            } else {
+                const h = prompt(timeTitle.textContent + ' | 시(0-23):', th.value ?? '');
+                if (h == null) return;
+                const m = prompt(timeTitle.textContent + ' | 분(0-59):', tm.value ?? '');
+                if (m == null) return;
+                th.value = h;
+                tm.value = m;
+                saveTime();
+            }
+        }
+
+        $('timeCancel').onclick = () => timeDialog.close();
+        $('timeSave').onclick = saveTime;
+
+        async function saveTime() {
+            if (!editingTurn) return;
+            const h = parseInt(th.value, 10);
+            const m = parseInt(tm.value, 10);
+            const body = (editingTurn === 't1')
+                ? { turn1Hour: h, turn1Minute: m }
+                : { turn2Hour: h, turn2Minute: m };
+            try {
+                const r = await fetch('/api/times', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify(body),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                timeDialog.close();
+                loadStatus();
+            } catch (e) {
+                alert('저장 실패: ' + e.message);
+            } finally {
+                editingTurn = null;
+            }
+        }
+
+        $('loginBtn').onclick = async () => {
+            const v = $('pwd').value?.trim();
+            if (!v) {
+                gateMsg.textContent = '비밀번호를 입력하세요.';
+                return;
+            }
+            setPwd(v);
+            gateMsg.textContent = '확인 중...';
+            try {
+                const r = await fetch('/api/status', {
+                    headers: authHeaders(),
+                    credentials: 'same-origin'
+                });
+                await jsonOrThrow(r);
+                showApp();
+                loadStatus();
+                connectSocket();
+            } catch {
+                gateMsg.textContent = '❌ 접속 실패';
+                clearPwd();
+            }
+        };
+
+        $('pwd').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') $('loginBtn').click();
+        });
+
+        let socket;
+        function connectSocket() {
+            if (socket) {
+                try { socket.disconnect(); } catch { }
+            }
+            socket = io('/', {
+                path: '/socket.io',
+                auth: { pwd: getPwd() }
+            });
+            socket.on('status', (data) => {
+                const j = data?.status;
+                if (j) renderStatus(j);
+            });
+            socket.on('connect_error', (err) => {
+                if (String(err?.message || '').includes('unauthorized')) {
+                    clearPwd();
+                    showGate('❌ 인증 실패. 비밀번호를 다시 입력하세요.');
+                }
+                setTimeout(connectSocket, 1500);
+            });
+            socket.on('disconnect', () => setTimeout(connectSocket, 1500));
+        }
+
+        if (getPwd()) {
+            showApp();
+            loadStatus();
+            connectSocket();
+        } else {
+            showGate();
+        }
+    </script>
+</body>
+
+</html>

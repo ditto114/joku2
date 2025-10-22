@@ -20,6 +20,10 @@ export const CONFIG = {
             skillbook1: "1000",    // 문자열로 변경 - 스킬북1 시세
             skillbook2: "300"      // 문자열로 변경 - 스킬북2 시세
         },
+        // 공대원 명단
+        guildMembers: [
+            // { nickname: '대칭', job: '전사' }
+        ],
         reservations: {
             turn1: {
                 first: { customer: '-', incentiveMember: '-', deposit: 0 },
@@ -43,17 +47,17 @@ export const CONFIG = {
 
     // 순번 매핑
     POSITION_MAPPING: {
-        '1t1': '[손님] 1트 1순',
-        '1t2': '[손님] 1트 2순',
-        '1t3': '[손님] 1트 3순',
-        '2t1': '[손님] 2트 1순',
-        '2t2': '[손님] 2트 2순',
-        '2t3': '[손님] 2트 3순',
-        'tris': '[손님] 트스북',
-        'arcom': '[손님] 어콤북',
-        'skillbook1': '[손님] 스킬북1',
-        'skillbook2': '[손님] 스킬북2',
-        'enre': '[손님] 엔레먹자',
+        '1t1': '1트 1순',
+        '1t2': '1트 2순',
+        '1t3': '1트 3순',
+        '2t1': '2트 1순',
+        '2t2': '2트 2순',
+        '2t3': '2트 3순',
+        'tris': '트스북',
+        'arcom': '어콤북',
+        'skillbook1': '스킬북1',
+        'skillbook2': '스킬북2',
+        'enre': '엔레먹자',
         'other': '기타'
     },
 

@@ -2,6 +2,7 @@
 import { readData, saveData } from './database.js';
 import { validators, formatReservation, checkRecruitmentStatus, sendToChannel, withErrorHandling } from './utils.js';
 import { CONFIG } from './config.js';
+import { notifyUpdate } from './realtime.js';
 
 // 현재 시간을 HH:MM 형식으로 가져오기
 function getCurrentTimeFormatted() {
@@ -30,6 +31,7 @@ export const completeReservation = withErrorHandling(async (client, position, re
 
     // 완료 메시지 전송
     await sendReservationCompleteMessage(client, position, reservationData);
+    notifyUpdate('completeReservation');
 
     return true;
 });
@@ -167,6 +169,7 @@ export const resetReservations = withErrorHandling(async (client, selectedItems)
     // 초기화 완료 메시지 전송
     const message = `🗑️ 다음 항목이 초기화되었습니다:\n${resetItems.join(', ')}`;
     await sendToChannel(client, CONFIG.CHANNELS.ANNOUNCEMENT, message);
+    notifyUpdate('resetReservations');
 
     return resetItems;
 });
@@ -234,6 +237,7 @@ export const resetAllReservations = withErrorHandling(async (client) => {
     // 초기화 완료 메시지 전송
     const message = '🗑️ 모든 예약이 초기화되었습니다!';
     await sendToChannel(client, CONFIG.CHANNELS.ANNOUNCEMENT, message);
+    notifyUpdate('resetAllReservations');
 
     return true;
 });
@@ -260,6 +264,7 @@ export const updatePrices = withErrorHandling(async (client, priceData) => {
     // 시세 변경 완료 메시지 전송
     const message = `💰 시세가 변경되었습니다!\n🏆 확투(1,2순): ${data.prices.firstSecond}\n🥉 3순: ${data.prices.third}\n📚 스킬북1: ${data.prices.skillbook1}\n📖 스킬북2: ${data.prices.skillbook2}`;
     await sendToChannel(client, CONFIG.CHANNELS.MANAGEMENT, message);
+    notifyUpdate('updatePrices');
 
     return true;
 });
@@ -298,6 +303,7 @@ export const updateDepartureTimes = withErrorHandling(async (client, timeData) =
     const turn2Time = `${data.departureTimes.turn2.hour}:${String(data.departureTimes.turn2.minute).padStart(2, '0')}`;
     const message = `⏰ 출발시간이 변경되었습니다!\n🔸 1트: ${turn1Time}\n🔹 2트: ${turn2Time}`;
     await sendToChannel(client, CONFIG.CHANNELS.MANAGEMENT, message);
+    notifyUpdate('updateDepartureTimes');
 
     return true;
 });
@@ -350,6 +356,8 @@ export const getReservationStatus = withErrorHandling(async () => {
     const data = await readData();
 
     return {
+        // 공대원 명단 포함
+        guildMembers: Array.isArray(data.guildMembers) ? data.guildMembers : [],
         turn1: {
             first: formatReservation(data.reservations.turn1.first),
             second: formatReservation(data.reservations.turn1.second),
@@ -383,7 +391,7 @@ export const generateRecruitmentTemplate = withErrorHandling(async () => {
     const data = await readData();
 
     // 랜덤 멘트 선택
-    const ment1Options = ["자쿰", "눕클", "자투먹자", "저녁쿰"];
+    const ment1Options = ["자쿰", "눕클", "자투", "쿰구"];
     const ment2Options = ["다수", "다수보유", "많음", "多"];
     const ment3Options = ["안전운영", "안전하게"];
     const ment4Options = ["(사고X)", "(사고NO)", "(사고걱정X)", "(사고걱정NO)"];
@@ -421,15 +429,8 @@ export const generateRecruitmentTemplate = withErrorHandling(async () => {
     const getStatus = (reservation) => checkRecruitmentStatus(reservation);
     const getStatusText = (reservation) => reservation.customer !== '-' ? '마감' : '가능';
 
-    const template = `:fire: 조쿠공대 ${ment1}
-:fire: 눕클 | 펫,물약 X | 50렙 ↑ | 후기 ${ment2}
-:fire: 3리저M ${ment3} ${ment4}
-:fire: 소요시간 : 33분 내외
->  :alarm_clock:  1 트 ( ${turn1Time.hour} : ${turn1Time.minute === 0 ? '00' : turn1Time.minute} )         :alarm_clock:  2 트 ( ${turn2Time.hour} : ${turn2Time.minute === 0 ? '00' : turn2Time.minute} )
->  :one: ${getStatus(data.reservations.turn1.first)} :moneybag:${prices.firstSecond}    :one: ${getStatus(data.reservations.turn2.first)} :moneybag:${prices.firstSecond}
->  :two: ${getStatus(data.reservations.turn1.second)} :moneybag:${prices.firstSecond}    :two: ${getStatus(data.reservations.turn2.second)} :moneybag:${prices.firstSecond}
->  :three: ${getStatus(data.reservations.turn1.third)} :moneybag:${prices.third} => 안뜨면 2트 진행 or 환불
->  :books: 트스 ${getStatus(data.reservations.skillbook1)} :moneybag:${prices.skillbook1}
->  :books: 엔레/어콤/어차 ${getStatus(data.reservations.skillbook2)} :moneybag:${prices.skillbook2}`;
+    const template = `:fire:조쿠공대 ${ment1}:fire: :one::alarm_clock:${turn1Time.hour} : ${turn1Time.minute === 0 ? '00' : turn1Time.minute} :two::alarm_clock:${turn2Time.hour} : ${turn2Time.minute === 0 ? '00' : turn2Time.minute} :green_circle:가능:x:마감
+:one:【${getStatus(data.reservations.turn1.first)}/${getStatus(data.reservations.turn1.second)}확투 ${prices.firstSecond}】【${getStatus(data.reservations.turn1.third)}3순 ${prices.third}】【${getStatus(data.reservations.skillbook1)}트스 ${prices.skillbook1}】
+:two:【${getStatus(data.reservations.turn2.first)}/${getStatus(data.reservations.turn2.second)}확투 ${prices.firstSecond}】【${getStatus(data.reservations.skillbook2)}어콤/어차/엔레 ${prices.skillbook2}】 `;
     return template;
 });

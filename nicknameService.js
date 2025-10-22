@@ -2,6 +2,8 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 // nicknameService.js
 import { CONFIG } from './config.js';
 import { validators, sendToChannel, withErrorHandling } from './utils.js';
+import { readData } from './database.js';
+import { formatHHMM, formatTodayMMDDKST } from './timeUtils.js';
 
 // 현재 시간을 HH:MM 형식으로 가져오기
 function getCurrentTimeFormatted() {
@@ -37,8 +39,13 @@ export const changeNickname = withErrorHandling(async (interaction, nickname, po
 // 순번에 따른 닉네임 포맷팅
 function formatNicknameWithPosition(nickname, position) {
     const positionText = CONFIG.POSITION_MAPPING[position];
-    return positionText ? `${positionText} ${nickname}` : nickname;
+    const dateTag = `[${formatTodayMMDDKST()}]`;
+    if (positionText) {
+        return `${dateTag} ${positionText} ${nickname}`;
+    }
+    return `${dateTag} ${nickname}`;
 }
+
 
 // 권한 검증 함수
 async function validatePermissions(interaction) {
@@ -112,20 +119,65 @@ export const sendNewMemberMessage = withErrorHandling(async (client, nickname) =
     return await sendToChannel(client, CONFIG.CHANNELS.MANAGEMENT, message);
 });
 
+
+
 export const sendWelcomePrivateMessage = withErrorHandling(async (interaction) => {
-    const welcomeMessage = `✅ **예약이 완료되었습니다.**
+    // 1) 캐시 강제 갱신
+    await interaction.member.fetch(true);             // 멤버(역할 포함) 최신화
+    await interaction.guild.roles.fetch();            // 길드 역할 목록 최신화
 
-📞 **출발시간 30분 전 부터는 "손님대기방" 통화방에 꼭 참가 부탁드립니다.** 
-   (마이크는 꺼주시되 듣기는 켜주세요!!)
+    // 2) '손님' 역할 ID 우선 사용 (CONFIG에 있으면 가장 안전)
+    const GUEST_ID =
+        CONFIG.ROLES?.GUEST_ID ??
+        interaction.guild.roles.cache.find(r => r.name === '손님')?.id;
 
-💬 **도어 운영 공지 및 질문 답변 등등은 https://discord.com/channels/1378989621987508244/1384111491392868402 에서 공지하고 있으니 필요하신 분은 확인 부탁드립니다.**`;
+    const roles = interaction.member.roles.cache;
 
-    return await interaction.followUp({ components: [
-],
-content: welcomeMessage,
+    // 3) 보유 여부 계산 (ID가 있으면 ID로, 없으면 이름으로)
+    const hasGuestRole = GUEST_ID
+        ? roles.has(GUEST_ID)
+        : roles.some(r => r.name === '손님');
+
+    const hasOtherRoles = roles.some(r =>
+        (GUEST_ID ? r.id !== GUEST_ID : r.name !== '손님') &&
+        r.name !== '@everyone'
+    );
+
+    // 4) 시간 계산 (1트 기준 30분 전)
+    const shiftMinutes = (t, delta) => {
+        if (!t) return undefined;
+        const total = (t.hour * 60 + t.minute + delta) % 1440;
+        const norm = total < 0 ? total + 1440 : total;
+        return { hour: Math.floor(norm / 60), minute: norm % 60 };
+    };
+
+    const data = await readData();
+    const t1 = data?.departureTimes?.turn1;      // { hour, minute } | undefined
+    const t1Minus30 = shiftMinutes(t1, -30);
+
+    // 5) 메시지들
+    const longMessage = `
+**예약이 정상적으로 완료되었습니다!**
+
+**금일 ${formatHHMM(t1Minus30)} 까지 [엘나스] 혹은 [자쿰으로통하는문] 맵에 주차 후 https://discord.com/channels/1378989621987508244/1378989621987508251 접속 부탁드립니다.**
+
+**https://discord.com/channels/1378989621987508244/1379346115983441990 내용을 꼭 숙지 부탁드립니다!**
+
+**궁금하신점이 있으시다면 https://discord.com/channels/1378989621987508244/1384111491392868402 에 자유롭게 질문해주시면 됩니다.**
+  `.trim();
+
+    const shortMessage = `✅ 예약이 완료되었습니다`;
+
+    // 6) 분기: 손님+다른 역할 ⇒ 짧은 멘트 / 그 외 ⇒ 긴 멘트
+    const content = (hasGuestRole && hasOtherRoles) ? shortMessage : longMessage;
+
+    return await interaction.followUp({
+        content,
+        components: [],
         ephemeral: true
-     });
+    });
 });
+
 
 // 에러 메시지 매핑
 export function getErrorMessage(error) {

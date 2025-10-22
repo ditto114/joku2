@@ -42,6 +42,14 @@ export const validators = {
         const num = parseInt(value);
         return !isNaN(num) && num >= min && num <= max;
     },
+    // 직업 검증 (한글 1글자, 영어/숫자 0.5글자 계산으로 최대 10글자, 특수문자 불허)
+    isValidJob: (job) => {
+        if (!job || typeof job !== 'string') return false;
+        const trimmed = job.trim();
+        if (trimmed.length === 0) return false;
+        const calculatedLength = calculateStringLength(trimmed);
+        return calculatedLength > 0 && calculatedLength <= 10;
+    },
 
     // 닉네임 검증 (한글 1글자, 영어/숫자 0.5글자로 총 6글자까지, 특수문자 불허)
     isValidNickname: (nickname) => {
@@ -107,7 +115,7 @@ export function formatReservation(reservation) {
 
 // 구인 상태 체크 함수
 export function checkRecruitmentStatus(reservation) {
-    return reservation.customer !== '-' ? ':x: 마감' : ':green_circle: 가능';
+    return reservation.customer !== '-' ? ':x:' : ':green_circle:';
 }
 
 // 채널 메시지 전송 함수

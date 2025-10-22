@@ -136,6 +136,19 @@ function validateAndFixData(data) {
 
     const result = { ...data };
 
+    // 공대원(guildMembers) 검증
+    if (!Array.isArray(result.guildMembers)) {
+        result.guildMembers = Array.isArray(defaultData.guildMembers) ? [...defaultData.guildMembers] : [];
+    } else {
+        result.guildMembers = result.guildMembers
+            .filter(m => m && typeof m === 'object')
+            .map(m => validateMember(m))
+            // 닉네임 중복 제거 (앞쪽 우선)
+            .reduce((acc, cur) => {
+                if (!acc.some(x => x.nickname === cur.nickname)) acc.push(cur);
+                return acc;
+            }, []);
+    }
     // prices 검증 - 문자열 기반으로 수정
     if (!result.prices || typeof result.prices !== 'object') {
         result.prices = { ...defaultData.prices };
@@ -253,6 +266,16 @@ function validatePriceString(price, defaultValue) {
     return defaultValue;
 }
 
+// 공대원 항목 검증
+function validateMember(m) {
+    const nick = (typeof m.nickname === 'string') ? m.nickname.trim() : '';
+    const job = (typeof m.job === 'string') ? m.job.trim() : '';
+    // 닉네임/직업이 비어있으면 스킵되도록 기본값 제공
+    return {
+        nickname: nick || '-',
+        job: job || '-'
+    };
+}
 // 캐시 무효화
 export function invalidateCache() {
     dataCache = null;
