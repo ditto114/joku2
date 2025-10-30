@@ -129,6 +129,49 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
+        .view-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .home-card {
+            align-items: center;
+            text-align: center;
+            gap: 18px;
+        }
+
+        .home-card h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .home-card p {
+            color: #4b5563;
+            font-size: 15px;
+        }
+
+        .home-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .home-actions button {
+            min-width: 220px;
+            padding: 16px 28px;
+            font-size: 16px;
+        }
+
         .card h2 {
             font-size: 18px;
             margin-bottom: 16px;
@@ -152,6 +195,10 @@
 
         /* 예약 현황 */
         .reservation-card {
+            padding: 28px;
+        }
+
+        .timer-card {
             padding: 28px;
         }
 
@@ -379,6 +426,162 @@
             font-variant-numeric: tabular-nums;
             font-weight: 600;
             color: #065f46;
+        }
+
+        .timer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .timer-clock-wrap {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .timer-clock-label {
+            font-weight: 600;
+            color: #4c1d95;
+        }
+
+        .timer-clock {
+            font-family: 'Courier New', monospace;
+            font-size: 26px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            color: #1d4ed8;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .timer-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .timer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .timer-item {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            border-radius: 16px;
+            padding: 18px 20px;
+            box-shadow: 0 10px 24px rgba(99, 102, 241, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .timer-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .timer-name {
+            flex: 1;
+            min-width: 160px;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 2px solid rgba(129, 140, 248, 0.25);
+            background: rgba(255, 255, 255, 0.92);
+            transition: all 0.2s ease;
+        }
+
+        .timer-name:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .timer-config {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .timer-config label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #4338ca;
+        }
+
+        .timer-config input {
+            width: 82px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(129, 140, 248, 0.3);
+            background: white;
+            text-align: center;
+            font-size: 15px;
+            font-variant-numeric: tabular-nums;
+            transition: all 0.2s ease;
+        }
+
+        .timer-config input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+        }
+
+        .timer-remaining {
+            font-family: 'Courier New', monospace;
+            font-size: 30px;
+            font-weight: 700;
+            color: #1d4ed8;
+            min-width: 120px;
+            text-align: right;
+        }
+
+        .timer-state {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(148, 163, 184, 0.18);
+            color: #374151;
+        }
+
+        .timer-state.is-running {
+            background: rgba(74, 222, 128, 0.25);
+            color: #166534;
+        }
+
+        .timer-state.is-finished {
+            background: rgba(248, 113, 113, 0.25);
+            color: #b91c1c;
+        }
+
+        .timer-empty {
+            padding: 26px;
+            border-radius: 16px;
+            border: 2px dashed rgba(148, 163, 184, 0.4);
+            color: #6b7280;
+            background: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            text-align: center;
         }
 
         .extra-grid {
@@ -767,12 +970,48 @@
 
     <!-- 메인 컨텐츠 -->
     <main id="app" class="hidden">
-        <section class="card reservation-card" id="reservationStatusCard">
+        <section class="card home-card view-card" id="homeCard">
+            <h2>📋 사용할 도구를 선택하세요</h2>
+            <p>관리 페이지에서 자쿰 예약 현황과 혼테일 타이머를 빠르게 관리할 수 있습니다.</p>
+            <div class="home-actions">
+                <button class="btn-primary" data-nav-target="reservation">자쿰 예약 현황 바로가기</button>
+                <button class="btn-secondary" data-nav-target="timer">혼테일 타이머 바로가기</button>
+            </div>
+        </section>
+
+        <section class="card reservation-card view-card hidden" id="reservationStatusCard">
             <div class="card-header">
                 <h2>🧑‍🤝‍🧑 현재 예약 현황</h2>
+                <div class="card-header-actions view-nav">
+                    <button class="btn-ghost" data-nav-target="home">← 도구 선택</button>
+                    <button class="btn-secondary" data-nav-target="timer">혼테일 타이머</button>
+                </div>
             </div>
             <div id="statusBox" class="reservation-grid">
                 <div class="status-msg">불러오는 중...</div>
+            </div>
+        </section>
+
+        <section class="card timer-card view-card hidden" id="timerView">
+            <div class="card-header">
+                <h2>🐉 혼테일 타이머</h2>
+                <div class="card-header-actions view-nav">
+                    <button class="btn-ghost" data-nav-target="home">← 도구 선택</button>
+                    <button class="btn-secondary" data-nav-target="reservation">자쿰 예약 현황</button>
+                </div>
+            </div>
+            <div class="timer-toolbar">
+                <div class="timer-clock-wrap">
+                    <span class="timer-clock-label">서버 시간</span>
+                    <span id="serverClock" class="timer-clock">--:--:--</span>
+                </div>
+                <div class="timer-actions">
+                    <button id="addTimer" class="btn-primary">➕ 타이머 추가</button>
+                </div>
+            </div>
+            <div id="timerMsg" class="status-msg hidden"></div>
+            <div id="timerList" class="timer-list">
+                <div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>
             </div>
         </section>
     </main>
@@ -892,6 +1131,16 @@
     <script>
         const $ = (id) => document.getElementById(id);
         const app = $('app'), gate = $('gate'), gateMsg = $('gateMsg');
+        const headerActions = document.querySelector('.header-actions');
+        const viewSections = {
+            home: $('homeCard'),
+            reservation: $('reservationStatusCard'),
+            timer: $('timerView')
+        };
+        const timerList = $('timerList');
+        const timerMsg = $('timerMsg');
+        const serverClock = $('serverClock');
+        const addTimerBtn = $('addTimer');
         const PWD_KEY = 'admin_password';
         const getPwd = () => sessionStorage.getItem(PWD_KEY) || '';
         const setPwd = v => sessionStorage.setItem(PWD_KEY, v || '');
@@ -899,6 +1148,15 @@
         const authHeaders = () => ({ 'x-admin-password': getPwd() });
 
         const LOOT_STORAGE_KEY = 'joku_admin_loot_state_v1';
+
+        let activeView = 'home';
+        let statusViewInitialized = false;
+        let timerSnapshot = null;
+        let timerIndex = new Map();
+        let timerTickHandle = null;
+        let serverOffset = 0;
+        let timerMsgTimeout = null;
+        let timersLoadedOnce = false;
 
         function withStorage(fn, fallback) {
             try { return fn(); }
@@ -919,6 +1177,424 @@
             .replace(/'/g, '&#39;');
 
         const escapeAttr = (str = '') => escapeHtml(str).replace(/`/g, '&#96;');
+
+        const clampTimerValue = (ms) => {
+            if (!Number.isFinite(ms)) return 0;
+            return Math.max(0, Math.round(ms));
+        };
+
+        const clampTimerInput = (value, max) => {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return 0;
+            return Math.max(0, Math.min(max, Math.floor(num)));
+        };
+
+        const formatTimerDuration = (ms) => {
+            const totalSeconds = Math.max(0, Math.floor(clampTimerValue(ms) / 1000));
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
+
+        function updateServerOffset(serverTime) {
+            if (Number.isFinite(serverTime)) {
+                serverOffset = serverTime - Date.now();
+            }
+        }
+
+        function getServerNow() {
+            return Date.now() + serverOffset;
+        }
+
+        function ensureTimerTicker() {
+            if (timerTickHandle) return;
+            timerTickHandle = setInterval(() => updateTimerCountdowns(), 1000);
+        }
+
+        function hideMsg(el) {
+            if (!el) return;
+            el.textContent = '';
+            el.classList.add('hidden');
+            el.classList.remove('success', 'error');
+        }
+
+        function showTimerMessage(message, type = 'success', autoHide = true) {
+            if (!timerMsg) return;
+            if (timerMsgTimeout) {
+                clearTimeout(timerMsgTimeout);
+                timerMsgTimeout = null;
+            }
+            showMsg(timerMsg, message, type);
+            if (autoHide && type === 'success') {
+                timerMsgTimeout = setTimeout(() => hideMsg(timerMsg), 2600);
+            }
+        }
+
+        function activateView(view = 'home') {
+            const target = viewSections[view] ? view : 'home';
+            activeView = target;
+            Object.entries(viewSections).forEach(([key, el]) => {
+                if (!el) return;
+                if (key === target) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            if (headerActions) {
+                if (target === 'reservation') {
+                    headerActions.classList.remove('hidden');
+                } else {
+                    headerActions.classList.add('hidden');
+                }
+            }
+
+            if (target !== 'timer' && timerMsg) {
+                hideMsg(timerMsg);
+                if (timerMsgTimeout) {
+                    clearTimeout(timerMsgTimeout);
+                    timerMsgTimeout = null;
+                }
+            }
+
+            if (target !== 'timer' && timerTickHandle) {
+                clearInterval(timerTickHandle);
+                timerTickHandle = null;
+            }
+
+            if (target === 'reservation' && !statusViewInitialized) {
+                statusViewInitialized = true;
+                loadStatus();
+            }
+
+            if (target === 'timer') {
+                if (!timersLoadedOnce) {
+                    loadTimers(true);
+                } else {
+                    loadTimers();
+                }
+                ensureTimerTicker();
+            }
+        }
+
+        function setTimerSnapshot(snapshot) {
+            if (!snapshot || typeof snapshot !== 'object') return;
+            const serverTime = Number(snapshot.serverTime);
+            const timers = Array.isArray(snapshot.timers) ? snapshot.timers : [];
+            const normalizedServerTime = Number.isFinite(serverTime) ? serverTime : Date.now();
+
+            const sanitizedTimers = timers
+                .filter(item => item && typeof item === 'object')
+                .map(item => {
+                    const id = String(item.id ?? '').trim();
+                    if (!id) return null;
+                    return {
+                        id,
+                        name: String(item.name ?? ''),
+                        durationMs: clampTimerValue(item.durationMs),
+                        remainingMs: clampTimerValue(item.remainingMs),
+                        isRunning: Boolean(item.isRunning),
+                        startedAt: Number.isFinite(Number(item.startedAt)) ? Number(item.startedAt) : null
+                    };
+                })
+                .filter(Boolean);
+
+            timerSnapshot = { serverTime: normalizedServerTime, timers: sanitizedTimers };
+            timerIndex = new Map(sanitizedTimers.map(timer => [timer.id, timer]));
+            updateServerOffset(normalizedServerTime);
+            renderTimerList();
+            updateTimerCountdowns(true);
+            timersLoadedOnce = true;
+
+            if (activeView === 'timer') {
+                ensureTimerTicker();
+            } else if (timerTickHandle) {
+                clearInterval(timerTickHandle);
+                timerTickHandle = null;
+            }
+        }
+
+        function renderTimerList() {
+            if (!timerList) return;
+            if (!timerSnapshot || timerSnapshot.timers.length === 0) {
+                timerList.innerHTML = '<div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>';
+                return;
+            }
+
+            timerList.innerHTML = timerSnapshot.timers.map(renderTimerItem).join('');
+        }
+
+        function renderTimerItem(timer) {
+            const minutes = Math.floor(timer.durationMs / 60000);
+            const seconds = Math.floor((timer.durationMs / 1000) % 60);
+            const state = timer.isRunning && timer.remainingMs > 0
+                ? 'running'
+                : (timer.remainingMs <= 0 ? 'finished' : 'paused');
+            const stateLabel = state === 'running' ? '진행 중' : (state === 'finished' ? '종료' : '대기');
+            const remainingDisplay = formatTimerDuration(timer.remainingMs);
+
+            return `
+                <div class="timer-item" data-timer-id="${escapeAttr(timer.id)}">
+                    <div class="timer-row">
+                        <input type="text" class="timer-name" value="${escapeHtml(timer.name || '')}" placeholder="타이머 이름" />
+                        <div class="timer-controls">
+                            <button type="button" class="btn-primary" data-timer-action="start">시작</button>
+                            <button type="button" class="btn-secondary" data-timer-action="reset">리셋</button>
+                            <button type="button" class="btn-danger" data-timer-action="delete">삭제</button>
+                        </div>
+                    </div>
+                    <div class="timer-row">
+                        <div class="timer-config">
+                            <label>분
+                                <input type="number" inputmode="numeric" class="timer-minute" min="0" max="720" value="${minutes}" />
+                            </label>
+                            <label>초
+                                <input type="number" inputmode="numeric" class="timer-second" min="0" max="59" value="${seconds}" />
+                            </label>
+                            <span class="timer-state${state === 'running' ? ' is-running' : state === 'finished' ? ' is-finished' : ''}" data-role="state" data-state="${state}">${stateLabel}</span>
+                        </div>
+                        <div class="timer-remaining" data-role="remaining">${remainingDisplay}</div>
+                    </div>
+                </div>`;
+        }
+
+        function updateTimerCountdowns() {
+            if (!timerSnapshot || !timerList) return;
+            const now = getServerNow();
+            const elapsed = Math.max(0, now - timerSnapshot.serverTime);
+
+            timerList.querySelectorAll('.timer-item').forEach(item => {
+                const id = item.getAttribute('data-timer-id');
+                if (!id) return;
+                const timer = timerIndex.get(id);
+                if (!timer) return;
+
+                let remaining = clampTimerValue(timer.remainingMs);
+                let state = timer.isRunning && remaining > 0 ? 'running' : (remaining <= 0 ? 'finished' : 'paused');
+
+                if (timer.isRunning) {
+                    remaining = clampTimerValue(timer.remainingMs - elapsed);
+                    state = remaining <= 0 ? 'finished' : 'running';
+                }
+
+                const remainingEl = item.querySelector('[data-role="remaining"]');
+                if (remainingEl) {
+                    remainingEl.textContent = formatTimerDuration(remaining);
+                }
+
+                const stateEl = item.querySelector('[data-role="state"]');
+                if (stateEl) {
+                    const label = state === 'running' ? '진행 중' : (state === 'finished' ? '종료' : '대기');
+                    stateEl.textContent = label;
+                    stateEl.dataset.state = state;
+                    stateEl.classList.toggle('is-running', state === 'running');
+                    stateEl.classList.toggle('is-finished', state === 'finished');
+                }
+            });
+
+            if (activeView === 'timer' && serverClock) {
+                const serverDate = new Date(now);
+                const hh = String(serverDate.getHours()).padStart(2, '0');
+                const mm = String(serverDate.getMinutes()).padStart(2, '0');
+                const ss = String(serverDate.getSeconds()).padStart(2, '0');
+                serverClock.textContent = `${hh}:${mm}:${ss}`;
+            }
+        }
+
+        async function loadTimers(showFeedback = false) {
+            if (!getPwd()) return;
+            if (showFeedback && timerMsg) {
+                showMsg(timerMsg, '⏳ 타이머 정보를 불러오는 중...', '');
+            }
+
+            try {
+                const r = await fetch('/api/timers', {
+                    headers: authHeaders(),
+                    credentials: 'same-origin'
+                });
+                const j = await jsonOrThrow(r);
+                if (!j?.ok) {
+                    throw new Error(j?.error || '타이머 정보를 불러오지 못했습니다.');
+                }
+                const snapshot = j.snapshot || { serverTime: j.serverTime, timers: j.timers };
+                setTimerSnapshot(snapshot);
+                if (showFeedback) {
+                    showTimerMessage('✅ 최신 타이머 정보를 불러왔습니다', 'success');
+                } else if (timerMsg && timerMsg.classList.contains('error')) {
+                    hideMsg(timerMsg);
+                }
+            } catch (e) {
+                showTimerMessage('❌ ' + (e?.message || '타이머 정보를 불러오지 못했습니다.'), 'error', false);
+            }
+        }
+
+        async function requestTimer(path, options, successMessage, autoHideSuccess = true) {
+            try {
+                const r = await fetch(path, options);
+                const j = await jsonOrThrow(r);
+                if (!j?.ok) {
+                    throw new Error(j?.error || '요청이 실패했습니다.');
+                }
+                if (successMessage) {
+                    showTimerMessage(successMessage, 'success', autoHideSuccess);
+                }
+                await loadTimers();
+                return j;
+            } catch (e) {
+                showTimerMessage('❌ ' + (e?.message || '요청 처리 중 오류가 발생했습니다.'), 'error', false);
+                throw e;
+            }
+        }
+
+        if (addTimerBtn) {
+            addTimerBtn.addEventListener('click', async () => {
+                if (!getPwd()) {
+                    showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                    return;
+                }
+                addTimerBtn.disabled = true;
+                try {
+                    await requestTimer('/api/timers', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({})
+                    }, '✅ 새 타이머를 추가했습니다');
+                } catch (e) {
+                    // 메시지는 requestTimer 내부에서 처리됨
+                } finally {
+                    addTimerBtn.disabled = false;
+                }
+            });
+        }
+
+        if (timerList) {
+            timerList.addEventListener('click', async (event) => {
+                const btn = event.target.closest('button[data-timer-action]');
+                if (!btn) return;
+                if (!getPwd()) {
+                    showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                    return;
+                }
+                const row = btn.closest('.timer-item');
+                if (!row) return;
+                const id = row.getAttribute('data-timer-id');
+                if (!id) return;
+                const action = btn.getAttribute('data-timer-action');
+                if (action === 'delete' && !confirm('선택한 타이머를 삭제하시겠습니까?')) {
+                    return;
+                }
+
+                btn.disabled = true;
+                try {
+                    if (action === 'start') {
+                        await requestTimer(`/api/timers/${id}/start`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({})
+                        }, '✅ 타이머를 시작했습니다');
+                    } else if (action === 'reset') {
+                        await requestTimer(`/api/timers/${id}/reset`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({})
+                        }, '✅ 타이머를 리셋했습니다');
+                    } else if (action === 'delete') {
+                        await requestTimer(`/api/timers/${id}`, {
+                            method: 'DELETE',
+                            headers: { ...authHeaders() },
+                            credentials: 'same-origin'
+                        }, '🗑️ 타이머를 삭제했습니다');
+                    }
+                } catch (e) {
+                    // 이미 처리됨
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+
+            timerList.addEventListener('change', async (event) => {
+                const input = event.target;
+                if (!input.classList.contains('timer-minute') && !input.classList.contains('timer-second')) return;
+                if (!getPwd()) {
+                    showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                    return;
+                }
+                const row = input.closest('.timer-item');
+                if (!row) return;
+                const id = row.getAttribute('data-timer-id');
+                if (!id) return;
+                const minuteInput = row.querySelector('.timer-minute');
+                const secondInput = row.querySelector('.timer-second');
+                const minutes = clampTimerInput(minuteInput?.value, 720);
+                const seconds = clampTimerInput(secondInput?.value, 59);
+                const current = timerIndex.get(id);
+                if (current) {
+                    const currentMinutes = Math.floor(current.durationMs / 60000);
+                    const currentSeconds = Math.floor((current.durationMs / 1000) % 60);
+                    if (minutes === currentMinutes && seconds === currentSeconds) {
+                        if (minuteInput) minuteInput.value = currentMinutes;
+                        if (secondInput) secondInput.value = currentSeconds;
+                        return;
+                    }
+                }
+
+                input.disabled = true;
+                try {
+                    await requestTimer(`/api/timers/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ minutes, seconds })
+                    }, '✅ 타이머 시간을 저장했습니다');
+                } catch (e) {
+                    const fallback = timerIndex.get(id);
+                    if (fallback) {
+                        if (minuteInput) minuteInput.value = Math.floor(fallback.durationMs / 60000);
+                        if (secondInput) secondInput.value = Math.floor((fallback.durationMs / 1000) % 60);
+                    }
+                } finally {
+                    input.disabled = false;
+                }
+            });
+
+            timerList.addEventListener('focusout', async (event) => {
+                const input = event.target;
+                if (!input.classList.contains('timer-name')) return;
+                if (!getPwd()) {
+                    showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                    return;
+                }
+                const row = input.closest('.timer-item');
+                if (!row) return;
+                const id = row.getAttribute('data-timer-id');
+                if (!id) return;
+                const nextName = input.value?.trim() ?? '';
+                const current = timerIndex.get(id);
+                if (current && nextName === current.name) {
+                    input.value = current.name;
+                    return;
+                }
+
+                input.readOnly = true;
+                try {
+                    await requestTimer(`/api/timers/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ name: nextName })
+                    }, '✅ 타이머 이름을 저장했습니다');
+                } catch (e) {
+                    const fallback = timerIndex.get(id);
+                    input.value = fallback ? fallback.name : '새 타이머';
+                } finally {
+                    input.readOnly = false;
+                }
+            });
+        }
 
         const formatDepositValue = (detail = {}) => {
             if (!detail.hasReservation) return '<span class="cell-empty">-</span>';
@@ -1056,6 +1732,18 @@
         });
 
 
+        document.querySelectorAll('[data-nav-target]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-nav-target') || 'home';
+                if (!getPwd()) {
+                    showGate('❌ 인증 필요: 먼저 로그인하세요.');
+                    return;
+                }
+                activateView(target);
+            });
+        });
+
+
         async function jsonOrThrow(r) {
             if (!r.ok) {
                 if (r.status === 401) { clearPwd(); showGate('❌ 인증 실패. 비밀번호를 다시 입력하세요.'); }
@@ -1065,8 +1753,44 @@
             return r.json();
         }
 
-        function showApp() { gate.classList.add('hidden'); app.classList.remove('hidden'); }
-        function showGate(msg = '') { app.classList.add('hidden'); gate.classList.remove('hidden'); gateMsg.textContent = msg; }
+        function showApp(view = 'home') {
+            gate.classList.add('hidden');
+            app.classList.remove('hidden');
+            activateView(view);
+        }
+
+        function showGate(msg = '') {
+            app.classList.add('hidden');
+            gate.classList.remove('hidden');
+            gateMsg.textContent = msg;
+            activeView = 'home';
+            statusViewInitialized = false;
+            timersLoadedOnce = false;
+            timerSnapshot = null;
+            timerIndex = new Map();
+            if (timerTickHandle) {
+                clearInterval(timerTickHandle);
+                timerTickHandle = null;
+            }
+            if (headerActions) {
+                headerActions.classList.add('hidden');
+            }
+            Object.values(viewSections).forEach(el => el && el.classList.add('hidden'));
+            if (timerMsg) {
+                hideMsg(timerMsg);
+                if (timerMsgTimeout) {
+                    clearTimeout(timerMsgTimeout);
+                    timerMsgTimeout = null;
+                }
+            }
+            if (timerList) {
+                timerList.innerHTML = '<div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>';
+            }
+            if (serverClock) {
+                serverClock.textContent = '--:--:--';
+            }
+            serverOffset = 0;
+        }
 
         function showMsg(el, msg, type = '') {
             el.textContent = msg;
@@ -1361,6 +2085,7 @@
         }
 
         async function loadStatus() {
+            statusViewInitialized = true;
             statusBox.innerHTML = '<div class="status-msg">불러오는 중...</div>';
             try {
                 const r = await fetch('/api/status', { headers: authHeaders(), credentials: 'same-origin' });
@@ -1539,7 +2264,8 @@
                     credentials: 'same-origin'
                 });
                 await jsonOrThrow(r);
-                showApp();
+                statusViewInitialized = true;
+                showApp('home');
                 loadStatus();
                 connectSocket();
             } catch {
@@ -1565,6 +2291,10 @@
                 const j = data?.status;
                 if (j) renderStatus(j);
             });
+            socket.on('timers', (data) => {
+                const snapshot = data?.snapshot || data;
+                if (snapshot) setTimerSnapshot(snapshot);
+            });
             socket.on('connect_error', (err) => {
                 if (String(err?.message || '').includes('unauthorized')) {
                     clearPwd();
@@ -1576,7 +2306,8 @@
         }
 
         if (getPwd()) {
-            showApp();
+            statusViewInitialized = true;
+            showApp('home');
             loadStatus();
             connectSocket();
         } else {

@@ -1,5 +1,6 @@
 // database.js
 import fs from 'fs/promises';
+import { randomUUID } from 'crypto';
 import { CONFIG } from './config.js';
 import { withErrorHandling } from './utils.js';
 
@@ -65,6 +66,12 @@ export const initDatabase = withErrorHandling(async () => {
             delete data.prices.skillbookPerTurn;
             needsSave = true;
             console.log('시세 skillbookPerTurn -> skillbook2로 마이그레이션되었습니다.');
+        }
+
+        if (!Array.isArray(data.timers)) {
+            data.timers = [];
+            needsSave = true;
+            console.log('timers 필드가 추가되었습니다.');
         }
 
         if (needsSave) {
@@ -218,6 +225,15 @@ function validateAndFixData(data) {
         });
     }
 
+    // timers 검증
+    if (!Array.isArray(result.timers)) {
+        result.timers = [];
+    } else {
+        result.timers = result.timers
+            .filter(t => t && typeof t === 'object')
+            .map(validateTimerEntry);
+    }
+
     return result;
 }
 
@@ -249,6 +265,41 @@ function validateHour(hour, defaultValue) {
 function validateMinute(minute, defaultValue) {
     const num = parseInt(minute);
     return (!isNaN(num) && num >= 0 && num <= 59) ? num : defaultValue;
+}
+
+function clampDuration(ms) {
+    if (!Number.isFinite(ms)) return 0;
+    const clamped = Math.max(0, Math.min(ms, 1000 * 60 * 60 * 12)); // 최대 12시간
+    return Math.round(clamped);
+}
+
+function validateTimerEntry(timer) {
+    const name = typeof timer.name === 'string' ? timer.name.trim() : '';
+    const durationMs = clampDuration(Number(timer.durationMs));
+    let remainingMs = clampDuration(Number(timer.remainingMs));
+    const parsedStartedAt = Number(timer.startedAt);
+    const parsedUpdatedAt = Number(timer.updatedAt);
+    const startedAt = Number.isFinite(parsedStartedAt) ? parsedStartedAt : null;
+    const updatedAt = Number.isFinite(parsedUpdatedAt) ? parsedUpdatedAt : null;
+    const isRunning = Boolean(timer.isRunning) && remainingMs > 0 && Number.isFinite(startedAt);
+
+    if (!Number.isFinite(remainingMs)) {
+        remainingMs = durationMs;
+    }
+
+    if (remainingMs > durationMs && durationMs > 0) {
+        remainingMs = durationMs;
+    }
+
+    return {
+        id: (typeof timer.id === 'string' && timer.id.trim().length > 0) ? timer.id.trim() : randomUUID(),
+        name: name || '타이머',
+        durationMs,
+        remainingMs: isRunning ? Math.min(remainingMs, durationMs || remainingMs) : remainingMs,
+        isRunning,
+        startedAt: isRunning ? startedAt : null,
+        updatedAt: updatedAt ?? null
+    };
 }
 
 function validatePriceString(price, defaultValue) {
