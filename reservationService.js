@@ -352,8 +352,40 @@ function validateTimeData(timeData) {
 }
 
 // 예약 현황 조회
+function normalizeReservationDetail(reservation = {}) {
+    const customer = typeof reservation.customer === 'string' ? reservation.customer.trim() : '';
+    const incentive = typeof reservation.incentiveMember === 'string' ? reservation.incentiveMember.trim() : '';
+    const rawDeposit = reservation.deposit;
+    const depositNumber = typeof rawDeposit === 'number' ? rawDeposit : parseInt(rawDeposit, 10);
+    const hasReservation = !!customer && customer !== '-';
+
+    return {
+        hasReservation,
+        nickname: hasReservation ? customer : '',
+        incentive: hasReservation && incentive !== '-' ? incentive : '',
+        deposit: hasReservation && !Number.isNaN(depositNumber) ? depositNumber : null,
+        rawDeposit,
+        skillbookName: typeof reservation.skillbookName === 'string' && reservation.skillbookName !== '-' ? reservation.skillbookName : ''
+    };
+}
+
 export const getReservationStatus = withErrorHandling(async () => {
     const data = await readData();
+
+    const turn1Details = {
+        first: normalizeReservationDetail(data.reservations.turn1.first),
+        second: normalizeReservationDetail(data.reservations.turn1.second),
+        third: normalizeReservationDetail(data.reservations.turn1.third)
+    };
+
+    const turn2Details = {
+        first: normalizeReservationDetail(data.reservations.turn2.first),
+        second: normalizeReservationDetail(data.reservations.turn2.second),
+        third: normalizeReservationDetail(data.reservations.turn2.third)
+    };
+
+    const skillbook1Detail = normalizeReservationDetail(data.reservations.skillbook1);
+    const skillbook2Detail = normalizeReservationDetail(data.reservations.skillbook2);
 
     return {
         // 공대원 명단 포함
@@ -368,6 +400,8 @@ export const getReservationStatus = withErrorHandling(async () => {
             second: formatReservation(data.reservations.turn2.second),
             third: formatReservation(data.reservations.turn2.third)
         },
+        turn1Details,
+        turn2Details,
         skillbook1: {
             reservation: formatReservation(data.reservations.skillbook1),
             name: data.reservations.skillbook1.skillbookName && data.reservations.skillbook1.skillbookName !== '-'
@@ -379,6 +413,10 @@ export const getReservationStatus = withErrorHandling(async () => {
             name: data.reservations.skillbook2.skillbookName && data.reservations.skillbook2.skillbookName !== '-'
                 ? `(${data.reservations.skillbook2.skillbookName})`
                 : ''
+        },
+        skillbookDetails: {
+            skillbook1: skillbook1Detail,
+            skillbook2: skillbook2Detail
         },
         enreEat: data.reservations.enreEat || [],
         prices: data.prices,

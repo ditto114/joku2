@@ -44,7 +44,15 @@ import { handleSelectMenuInteractions } from './selectMenuHandlers.js';
 // ── Socket.IO 추가 ──────────────────────────────────────────────────────
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { realtimeBus } from './realtime.js';
+import { realtimeBus, notifyUpdate } from './realtime.js';
+import {
+    getTimerSnapshot,
+    createTimer,
+    updateTimerMeta,
+    startTimer as startSharedTimer,
+    resetTimer as resetSharedTimer,
+    deleteTimer as deleteSharedTimer
+} from './timerService.js';
 
 const client = new Client({
     intents: [
@@ -308,6 +316,76 @@ app.post('/api/screenshot', async (req, res) => {
     }
 });
 
+function mapTimerErrorStatus(error) {
+    if (!error || typeof error.message !== 'string') {
+        return 400;
+    }
+    return error.message.includes('찾을 수 없습니다') ? 404 : 400;
+}
+
+app.get('/api/timers', async (req, res) => {
+    try {
+        const snapshot = await getTimerSnapshot();
+        res.json({ ok: true, snapshot });
+    } catch (e) {
+        res.status(500).json({ ok: false, error: e.message });
+    }
+});
+
+app.post('/api/timers', async (req, res) => {
+    try {
+        const { timer } = await createTimer(req.body || {});
+        notifyUpdate('timers');
+        res.json({ ok: true, timer });
+    } catch (e) {
+        res.status(400).json({ ok: false, error: e.message });
+    }
+});
+
+app.patch('/api/timers/:id', async (req, res) => {
+    const id = req.params?.id;
+    try {
+        const { timer, changed } = await updateTimerMeta(id, req.body || {});
+        if (changed) notifyUpdate('timers');
+        res.json({ ok: true, timer });
+    } catch (e) {
+        res.status(mapTimerErrorStatus(e)).json({ ok: false, error: e.message });
+    }
+});
+
+app.post('/api/timers/:id/start', async (req, res) => {
+    const id = req.params?.id;
+    try {
+        const { timer, changed } = await startSharedTimer(id);
+        if (changed) notifyUpdate('timers');
+        res.json({ ok: true, timer });
+    } catch (e) {
+        res.status(mapTimerErrorStatus(e)).json({ ok: false, error: e.message });
+    }
+});
+
+app.post('/api/timers/:id/reset', async (req, res) => {
+    const id = req.params?.id;
+    try {
+        const { timer, changed } = await resetSharedTimer(id);
+        if (changed) notifyUpdate('timers');
+        res.json({ ok: true, timer });
+    } catch (e) {
+        res.status(mapTimerErrorStatus(e)).json({ ok: false, error: e.message });
+    }
+});
+
+app.delete('/api/timers/:id', async (req, res) => {
+    const id = req.params?.id;
+    try {
+        const { changed } = await deleteSharedTimer(id);
+        if (changed) notifyUpdate('timers');
+        res.json({ ok: true });
+    } catch (e) {
+        res.status(mapTimerErrorStatus(e)).json({ ok: false, error: e.message });
+    }
+});
+
 // ── HTTP + Socket.IO 서버 시작 ────────────────────────────────────────
 const PORT = process.env.PORT || 47984;
 const httpServer = createServer(app);
@@ -338,19 +416,35 @@ async function broadcastStatus() {
     }
 }
 
+async function broadcastTimers() {
+    try {
+        const snapshot = await getTimerSnapshot();
+        io.emit('timers', { snapshot });
+    } catch (e) {
+        console.error('broadcastTimers error:', e);
+    }
+}
+
 // 최초 접속 시 1회 상태 전송
 io.on('connection', async (socket) => {
     try {
         const status = await getReservationStatus();
         socket.emit('status', { status });
+        const timers = await getTimerSnapshot();
+        socket.emit('timers', { snapshot: timers });
     } catch (e) {
         console.error('socket connection status send error:', e);
     }
 });
 
 // 서비스 레벨 업데이트 이벤트에 반응하여 실시간 push
-realtimeBus.on('update', () => {
-    broadcastStatus();
+realtimeBus.on('update', (payload = {}) => {
+    const type = payload.type;
+    if (type === 'timers') {
+        broadcastTimers();
+    } else {
+        broadcastStatus();
+    }
 });
 
 httpServer.listen(PORT, () => {
