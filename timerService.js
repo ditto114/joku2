@@ -46,6 +46,12 @@ function ensureTimers(data) {
 function applyTimerExpiration(timer, now) {
     let changed = false;
 
+    const normalizedDuration = clampDuration(timer.durationMs);
+    if (normalizedDuration !== timer.durationMs) {
+        timer.durationMs = normalizedDuration;
+        changed = true;
+    }
+
     if (!Number.isFinite(timer.durationMs)) {
         timer.durationMs = 0;
         changed = true;
@@ -66,6 +72,11 @@ function applyTimerExpiration(timer, now) {
         changed = true;
     }
 
+    if (typeof timer.repeat !== 'boolean') {
+        timer.repeat = false;
+        changed = true;
+    }
+
     if (timer.isRunning) {
         const startedAt = Number(timer.startedAt);
         if (!Number.isFinite(startedAt)) {
@@ -75,10 +86,25 @@ function applyTimerExpiration(timer, now) {
         } else {
             const elapsed = Math.max(0, now - startedAt);
             if (elapsed >= timer.remainingMs) {
-                timer.isRunning = false;
-                timer.startedAt = null;
-                timer.remainingMs = 0;
-                changed = true;
+                if (timer.repeat && timer.durationMs > 0) {
+                    const duration = timer.durationMs;
+                    const overshoot = Math.max(0, elapsed - timer.remainingMs);
+                    const remainder = duration > 0 ? overshoot % duration : 0;
+                    let timeLeft = duration - remainder;
+                    if (timeLeft <= 0) {
+                        timeLeft = duration;
+                    }
+                    timer.remainingMs = duration;
+                    timer.startedAt = now - (duration - timeLeft);
+                    timer.isRunning = true;
+                    timer.updatedAt = now;
+                    changed = true;
+                } else {
+                    timer.isRunning = false;
+                    timer.startedAt = null;
+                    timer.remainingMs = 0;
+                    changed = true;
+                }
             }
         }
     } else if (timer.startedAt != null) {
@@ -93,7 +119,8 @@ function toClientTimer(timer, now) {
     const startedAt = Number(timer.startedAt);
     const running = Boolean(timer.isRunning) && Number.isFinite(startedAt);
     const elapsed = running ? Math.max(0, now - startedAt) : 0;
-    const remaining = running ? Math.max(0, timer.remainingMs - elapsed) : Math.max(0, timer.remainingMs);
+    const baseRemaining = clampDuration(timer.remainingMs);
+    const remaining = running ? Math.max(0, baseRemaining - elapsed) : Math.max(0, baseRemaining);
     const isRunning = running && remaining > 0;
 
     const normalizedUpdatedAt = Number(timer.updatedAt);
@@ -102,9 +129,10 @@ function toClientTimer(timer, now) {
         id: timer.id,
         name: timer.name,
         durationMs: clampDuration(timer.durationMs),
-        remainingMs: isRunning ? remaining : Math.max(0, timer.remainingMs),
+        remainingMs: isRunning ? remaining : Math.max(0, baseRemaining),
         isRunning,
         startedAt: isRunning ? startedAt : null,
+        repeat: Boolean(timer.repeat),
         updatedAt: Number.isFinite(normalizedUpdatedAt) ? normalizedUpdatedAt : null
     };
 }
@@ -154,6 +182,7 @@ export async function createTimer(payload = {}) {
         remainingMs: durationMs,
         isRunning: false,
         startedAt: null,
+        repeat: false,
         updatedAt: now
     };
 
@@ -193,6 +222,14 @@ export async function updateTimerMeta(id, payload = {}) {
         updated = true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(payload, 'repeat')) {
+        const nextRepeat = Boolean(payload.repeat);
+        if (nextRepeat !== Boolean(timer.repeat)) {
+            timer.repeat = nextRepeat;
+            updated = true;
+        }
+    }
+
     if (!updated) {
         return { timer: toClientTimer(timer, now), changed: false };
     }
@@ -222,15 +259,22 @@ export async function startTimer(id) {
     let remaining = running ? Math.max(0, timer.remainingMs - elapsed) : timer.remainingMs;
 
     if (remaining <= 0) {
-        timer.remainingMs = 0;
-        timer.isRunning = false;
-        timer.startedAt = null;
-        timer.updatedAt = now;
-        await saveData(data);
-        return { timer: toClientTimer(timer, now), changed: true };
+        const duration = clampDuration(timer.durationMs);
+        if (duration > 0) {
+            remaining = duration;
+            timer.remainingMs = duration;
+        } else {
+            timer.remainingMs = 0;
+            timer.isRunning = false;
+            timer.startedAt = null;
+            timer.updatedAt = now;
+            await saveData(data);
+            return { timer: toClientTimer(timer, now), changed: true };
+        }
+    } else {
+        timer.remainingMs = remaining;
     }
 
-    timer.remainingMs = remaining;
     timer.isRunning = true;
     timer.startedAt = now;
     timer.updatedAt = now;
@@ -250,7 +294,9 @@ export async function resetTimer(id) {
         throw new Error('타이머를 찾을 수 없습니다.');
     }
 
-    timer.remainingMs = timer.durationMs;
+    const duration = clampDuration(timer.durationMs);
+    timer.durationMs = duration;
+    timer.remainingMs = duration;
     timer.isRunning = false;
     timer.startedAt = null;
     timer.updatedAt = now;

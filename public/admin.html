@@ -199,7 +199,7 @@
         }
 
         .timer-card {
-            padding: 28px;
+            padding: 24px;
         }
 
         .reservation-grid {
@@ -428,43 +428,85 @@
             color: #065f46;
         }
 
-        .timer-toolbar {
+        .timer-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
+            justify-content: flex-end;
+            margin-bottom: 18px;
+            gap: 10px;
         }
 
-        .timer-clock-wrap {
+        .timer-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .timer-item {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            border-radius: 16px;
+            padding: 16px 18px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.12);
             display: flex;
-            align-items: baseline;
+            flex-direction: column;
             gap: 12px;
         }
 
-        .timer-clock-label {
-            font-weight: 600;
-            color: #4c1d95;
-        }
-
-        .timer-clock {
-            font-family: 'Courier New', monospace;
-            font-size: 26px;
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.85);
-            color: #1d4ed8;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .timer-actions {
+        .timer-row {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             align-items: center;
         }
 
-        .timer-list {
+        .timer-name {
+            width: 100%;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(129, 140, 248, 0.25);
+            background: rgba(255, 255, 255, 0.92);
+            transition: all 0.2s ease;
+        }
+
+        .timer-name:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .timer-controls .btn-primary,
+        .timer-controls .btn-secondary,
+        .timer-controls .btn-danger,
+        .timer-controls .btn-repeat {
+            flex: 1;
+            min-width: 0;
+            justify-content: center;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .btn-repeat {
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(255, 255, 255, 0.9);
+            color: #4c1d95;
+        }
+
+        .btn-repeat.is-active {
+            background: rgba(129, 140, 248, 0.18);
+            border-color: rgba(99, 102, 241, 0.6);
+            color: #312e81;
+        }
+
+        .timer-config {
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -485,80 +527,49 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .timer-name {
-            flex: 1;
-            min-width: 160px;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 2px solid rgba(129, 140, 248, 0.25);
-            background: rgba(255, 255, 255, 0.92);
-            transition: all 0.2s ease;
-        }
-
-        .timer-name:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-        }
-
-        .timer-controls {
-            display: flex;
+            gap: 14px;
             flex-wrap: wrap;
-            gap: 8px;
         }
 
-        .timer-config {
+        .timer-input {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .timer-config label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-weight: 600;
             color: #4338ca;
         }
 
-        .timer-config input {
-            width: 82px;
-            padding: 10px 12px;
-            border-radius: 12px;
+        .timer-input input {
+            width: 68px;
+            padding: 8px 10px;
+            border-radius: 10px;
             border: 2px solid rgba(129, 140, 248, 0.3);
             background: white;
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             font-variant-numeric: tabular-nums;
             transition: all 0.2s ease;
         }
 
-        .timer-config input:focus {
+        .timer-input input:focus {
             outline: none;
             border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
         }
 
         .timer-remaining {
             font-family: 'Courier New', monospace;
-            font-size: 30px;
+            font-size: 26px;
             font-weight: 700;
             color: #1d4ed8;
-            min-width: 120px;
-            text-align: right;
+            text-align: center;
         }
 
         .timer-state {
-            padding: 4px 12px;
+            align-self: flex-start;
+            padding: 4px 10px;
             border-radius: 999px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             background: rgba(148, 163, 184, 0.18);
             color: #374151;
@@ -575,9 +586,9 @@
         }
 
         .timer-empty {
-            padding: 26px;
+            padding: 22px;
             border-radius: 16px;
-            border: 2px dashed rgba(148, 163, 184, 0.4);
+            border: 2px dashed rgba(148, 163, 184, 0.35);
             color: #6b7280;
             background: rgba(255, 255, 255, 0.75);
             font-weight: 500;
@@ -1000,16 +1011,9 @@
                     <button class="btn-secondary" data-nav-target="reservation">자쿰 예약 현황</button>
                 </div>
             </div>
-            <div class="timer-toolbar">
-                <div class="timer-clock-wrap">
-                    <span class="timer-clock-label">서버 시간</span>
-                    <span id="serverClock" class="timer-clock">--:--:--</span>
-                </div>
-                <div class="timer-actions">
-                    <button id="addTimer" class="btn-primary">➕ 타이머 추가</button>
-                </div>
+            <div class="timer-actions">
+                <button id="addTimer" class="btn-primary">➕ 타이머 추가</button>
             </div>
-            <div id="timerMsg" class="status-msg hidden"></div>
             <div id="timerList" class="timer-list">
                 <div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>
             </div>
@@ -1138,8 +1142,6 @@
             timer: $('timerView')
         };
         const timerList = $('timerList');
-        const timerMsg = $('timerMsg');
-        const serverClock = $('serverClock');
         const addTimerBtn = $('addTimer');
         const PWD_KEY = 'admin_password';
         const getPwd = () => sessionStorage.getItem(PWD_KEY) || '';
@@ -1151,11 +1153,10 @@
 
         let activeView = 'home';
         let statusViewInitialized = false;
-        let timerSnapshot = null;
+        let timerData = [];
         let timerIndex = new Map();
         let timerTickHandle = null;
-        let serverOffset = 0;
-        let timerMsgTimeout = null;
+        let lastTimerTickAt = null;
         let timersLoadedOnce = false;
 
         function withStorage(fn, fallback) {
@@ -1196,38 +1197,18 @@
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         };
 
-        function updateServerOffset(serverTime) {
-            if (Number.isFinite(serverTime)) {
-                serverOffset = serverTime - Date.now();
-            }
-        }
-
-        function getServerNow() {
-            return Date.now() + serverOffset;
-        }
-
         function ensureTimerTicker() {
             if (timerTickHandle) return;
+            lastTimerTickAt = Date.now();
             timerTickHandle = setInterval(() => updateTimerCountdowns(), 1000);
         }
 
-        function hideMsg(el) {
-            if (!el) return;
-            el.textContent = '';
-            el.classList.add('hidden');
-            el.classList.remove('success', 'error');
-        }
-
-        function showTimerMessage(message, type = 'success', autoHide = true) {
-            if (!timerMsg) return;
-            if (timerMsgTimeout) {
-                clearTimeout(timerMsgTimeout);
-                timerMsgTimeout = null;
+        function stopTimerTicker() {
+            if (timerTickHandle) {
+                clearInterval(timerTickHandle);
+                timerTickHandle = null;
             }
-            showMsg(timerMsg, message, type);
-            if (autoHide && type === 'success') {
-                timerMsgTimeout = setTimeout(() => hideMsg(timerMsg), 2600);
-            }
+            lastTimerTickAt = null;
         }
 
         function activateView(view = 'home') {
@@ -1250,17 +1231,8 @@
                 }
             }
 
-            if (target !== 'timer' && timerMsg) {
-                hideMsg(timerMsg);
-                if (timerMsgTimeout) {
-                    clearTimeout(timerMsgTimeout);
-                    timerMsgTimeout = null;
-                }
-            }
-
-            if (target !== 'timer' && timerTickHandle) {
-                clearInterval(timerTickHandle);
-                timerTickHandle = null;
+            if (target !== 'timer') {
+                stopTimerTicker();
             }
 
             if (target === 'reservation' && !statusViewInitialized) {
@@ -1280,49 +1252,47 @@
 
         function setTimerSnapshot(snapshot) {
             if (!snapshot || typeof snapshot !== 'object') return;
-            const serverTime = Number(snapshot.serverTime);
             const timers = Array.isArray(snapshot.timers) ? snapshot.timers : [];
-            const normalizedServerTime = Number.isFinite(serverTime) ? serverTime : Date.now();
 
             const sanitizedTimers = timers
                 .filter(item => item && typeof item === 'object')
                 .map(item => {
                     const id = String(item.id ?? '').trim();
                     if (!id) return null;
+                    const durationMs = clampTimerValue(item.durationMs);
+                    const remainingMs = clampTimerValue(item.remainingMs);
                     return {
                         id,
                         name: String(item.name ?? ''),
-                        durationMs: clampTimerValue(item.durationMs),
-                        remainingMs: clampTimerValue(item.remainingMs),
-                        isRunning: Boolean(item.isRunning),
-                        startedAt: Number.isFinite(Number(item.startedAt)) ? Number(item.startedAt) : null
+                        durationMs,
+                        remainingMs,
+                        isRunning: Boolean(item.isRunning) && remainingMs > 0,
+                        repeat: Boolean(item.repeat)
                     };
                 })
                 .filter(Boolean);
 
-            timerSnapshot = { serverTime: normalizedServerTime, timers: sanitizedTimers };
-            timerIndex = new Map(sanitizedTimers.map(timer => [timer.id, timer]));
-            updateServerOffset(normalizedServerTime);
+            timerData = sanitizedTimers.map(timer => ({ ...timer }));
+            timerIndex = new Map(timerData.map(timer => [timer.id, timer]));
             renderTimerList();
             updateTimerCountdowns(true);
             timersLoadedOnce = true;
 
             if (activeView === 'timer') {
                 ensureTimerTicker();
-            } else if (timerTickHandle) {
-                clearInterval(timerTickHandle);
-                timerTickHandle = null;
+            } else {
+                stopTimerTicker();
             }
         }
 
         function renderTimerList() {
             if (!timerList) return;
-            if (!timerSnapshot || timerSnapshot.timers.length === 0) {
+            if (!timerData || timerData.length === 0) {
                 timerList.innerHTML = '<div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>';
                 return;
             }
 
-            timerList.innerHTML = timerSnapshot.timers.map(renderTimerItem).join('');
+            timerList.innerHTML = timerData.map(renderTimerItem).join('');
         }
 
         function renderTimerItem(timer) {
@@ -1333,24 +1303,28 @@
                 : (timer.remainingMs <= 0 ? 'finished' : 'paused');
             const stateLabel = state === 'running' ? '진행 중' : (state === 'finished' ? '종료' : '대기');
             const remainingDisplay = formatTimerDuration(timer.remainingMs);
+            const toggleLabel = timer.isRunning ? '리셋' : '시작';
+            const repeatClass = timer.repeat ? 'btn-repeat is-active' : 'btn-repeat';
 
             return `
                 <div class="timer-item" data-timer-id="${escapeAttr(timer.id)}">
                     <div class="timer-row">
                         <input type="text" class="timer-name" value="${escapeHtml(timer.name || '')}" placeholder="타이머 이름" />
                         <div class="timer-controls">
-                            <button type="button" class="btn-primary" data-timer-action="start">시작</button>
-                            <button type="button" class="btn-secondary" data-timer-action="reset">리셋</button>
+                            <button type="button" class="btn-primary" data-timer-action="toggle">${toggleLabel}</button>
+                            <button type="button" class="${repeatClass}" data-timer-action="repeat">반복</button>
                             <button type="button" class="btn-danger" data-timer-action="delete">삭제</button>
                         </div>
                     </div>
                     <div class="timer-row">
                         <div class="timer-config">
-                            <label>분
+                            <label class="timer-input">
                                 <input type="number" inputmode="numeric" class="timer-minute" min="0" max="720" value="${minutes}" />
+                                <span>분</span>
                             </label>
-                            <label>초
+                            <label class="timer-input">
                                 <input type="number" inputmode="numeric" class="timer-second" min="0" max="59" value="${seconds}" />
+                                <span>초</span>
                             </label>
                             <span class="timer-state${state === 'running' ? ' is-running' : state === 'finished' ? ' is-finished' : ''}" data-role="state" data-state="${state}">${stateLabel}</span>
                         </div>
@@ -1359,10 +1333,48 @@
                 </div>`;
         }
 
-        function updateTimerCountdowns() {
-            if (!timerSnapshot || !timerList) return;
-            const now = getServerNow();
-            const elapsed = Math.max(0, now - timerSnapshot.serverTime);
+        function updateTimerCountdowns(force = false) {
+            if (!timerList || timerIndex.size === 0) return;
+            const now = Date.now();
+            if (force || lastTimerTickAt == null) {
+                lastTimerTickAt = now;
+            }
+
+            const delta = force || lastTimerTickAt == null ? 0 : Math.max(0, now - lastTimerTickAt);
+            lastTimerTickAt = now;
+
+            timerIndex.forEach(timer => {
+                if (!timer) return;
+                timer.remainingMs = clampTimerValue(timer.remainingMs);
+
+                if (timer.isRunning && delta > 0) {
+                    const duration = clampTimerValue(timer.durationMs);
+                    const baseRemaining = clampTimerValue(timer.remainingMs);
+                    let nextRemaining = baseRemaining - delta;
+
+                    if (nextRemaining <= 0) {
+                        if (timer.repeat && duration > 0) {
+                            const overshoot = Math.abs(nextRemaining);
+                            const remainder = overshoot % duration;
+                            nextRemaining = duration - remainder;
+                            if (remainder === 0) {
+                                nextRemaining = duration;
+                            }
+                            timer.remainingMs = nextRemaining;
+                            timer.isRunning = true;
+                        } else {
+                            timer.remainingMs = 0;
+                            timer.isRunning = false;
+                        }
+                    } else {
+                        timer.remainingMs = nextRemaining;
+                    }
+                }
+
+                if (!timer.isRunning && timer.remainingMs < 0) {
+                    timer.remainingMs = 0;
+                }
+            });
 
             timerList.querySelectorAll('.timer-item').forEach(item => {
                 const id = item.getAttribute('data-timer-id');
@@ -1370,13 +1382,8 @@
                 const timer = timerIndex.get(id);
                 if (!timer) return;
 
-                let remaining = clampTimerValue(timer.remainingMs);
-                let state = timer.isRunning && remaining > 0 ? 'running' : (remaining <= 0 ? 'finished' : 'paused');
-
-                if (timer.isRunning) {
-                    remaining = clampTimerValue(timer.remainingMs - elapsed);
-                    state = remaining <= 0 ? 'finished' : 'running';
-                }
+                const remaining = clampTimerValue(timer.remainingMs);
+                const state = timer.isRunning ? 'running' : (remaining <= 0 ? 'finished' : 'paused');
 
                 const remainingEl = item.querySelector('[data-role="remaining"]');
                 if (remainingEl) {
@@ -1391,23 +1398,21 @@
                     stateEl.classList.toggle('is-running', state === 'running');
                     stateEl.classList.toggle('is-finished', state === 'finished');
                 }
-            });
 
-            if (activeView === 'timer' && serverClock) {
-                const serverDate = new Date(now);
-                const hh = String(serverDate.getHours()).padStart(2, '0');
-                const mm = String(serverDate.getMinutes()).padStart(2, '0');
-                const ss = String(serverDate.getSeconds()).padStart(2, '0');
-                serverClock.textContent = `${hh}:${mm}:${ss}`;
-            }
+                const toggleBtn = item.querySelector('button[data-timer-action="toggle"]');
+                if (toggleBtn) {
+                    toggleBtn.textContent = timer.isRunning ? '리셋' : '시작';
+                }
+
+                const repeatBtn = item.querySelector('button[data-timer-action="repeat"]');
+                if (repeatBtn) {
+                    repeatBtn.classList.toggle('is-active', Boolean(timer.repeat));
+                }
+            });
         }
 
         async function loadTimers(showFeedback = false) {
             if (!getPwd()) return;
-            if (showFeedback && timerMsg) {
-                showMsg(timerMsg, '⏳ 타이머 정보를 불러오는 중...', '');
-            }
-
             try {
                 const r = await fetch('/api/timers', {
                     headers: authHeaders(),
@@ -1419,30 +1424,22 @@
                 }
                 const snapshot = j.snapshot || { serverTime: j.serverTime, timers: j.timers };
                 setTimerSnapshot(snapshot);
-                if (showFeedback) {
-                    showTimerMessage('✅ 최신 타이머 정보를 불러왔습니다', 'success');
-                } else if (timerMsg && timerMsg.classList.contains('error')) {
-                    hideMsg(timerMsg);
-                }
             } catch (e) {
-                showTimerMessage('❌ ' + (e?.message || '타이머 정보를 불러오지 못했습니다.'), 'error', false);
+                console.error(e);
             }
         }
 
-        async function requestTimer(path, options, successMessage, autoHideSuccess = true) {
+        async function requestTimer(path, options) {
             try {
                 const r = await fetch(path, options);
                 const j = await jsonOrThrow(r);
                 if (!j?.ok) {
                     throw new Error(j?.error || '요청이 실패했습니다.');
                 }
-                if (successMessage) {
-                    showTimerMessage(successMessage, 'success', autoHideSuccess);
-                }
                 await loadTimers();
                 return j;
             } catch (e) {
-                showTimerMessage('❌ ' + (e?.message || '요청 처리 중 오류가 발생했습니다.'), 'error', false);
+                console.error(e);
                 throw e;
             }
         }
@@ -1460,9 +1457,9 @@
                         headers: { 'Content-Type': 'application/json', ...authHeaders() },
                         credentials: 'same-origin',
                         body: JSON.stringify({})
-                    }, '✅ 새 타이머를 추가했습니다');
+                    });
                 } catch (e) {
-                    // 메시지는 requestTimer 내부에서 처리됨
+                    // 에러는 콘솔에 기록됨
                 } finally {
                     addTimerBtn.disabled = false;
                 }
@@ -1488,29 +1485,34 @@
 
                 btn.disabled = true;
                 try {
-                    if (action === 'start') {
-                        await requestTimer(`/api/timers/${id}/start`, {
+                    if (action === 'toggle') {
+                        const current = timerIndex.get(id);
+                        const running = current?.isRunning;
+                        const endpoint = running ? 'reset' : 'start';
+                        await requestTimer(`/api/timers/${id}/${endpoint}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', ...authHeaders() },
                             credentials: 'same-origin',
                             body: JSON.stringify({})
-                        }, '✅ 타이머를 시작했습니다');
-                    } else if (action === 'reset') {
-                        await requestTimer(`/api/timers/${id}/reset`, {
-                            method: 'POST',
+                        });
+                    } else if (action === 'repeat') {
+                        const current = timerIndex.get(id);
+                        const nextRepeat = !Boolean(current?.repeat);
+                        await requestTimer(`/api/timers/${id}`, {
+                            method: 'PATCH',
                             headers: { 'Content-Type': 'application/json', ...authHeaders() },
                             credentials: 'same-origin',
-                            body: JSON.stringify({})
-                        }, '✅ 타이머를 리셋했습니다');
+                            body: JSON.stringify({ repeat: nextRepeat })
+                        });
                     } else if (action === 'delete') {
                         await requestTimer(`/api/timers/${id}`, {
                             method: 'DELETE',
                             headers: { ...authHeaders() },
                             credentials: 'same-origin'
-                        }, '🗑️ 타이머를 삭제했습니다');
+                        });
                     }
                 } catch (e) {
-                    // 이미 처리됨
+                    // 에러는 콘솔에 기록됨
                 } finally {
                     btn.disabled = false;
                 }
@@ -1549,7 +1551,7 @@
                         headers: { 'Content-Type': 'application/json', ...authHeaders() },
                         credentials: 'same-origin',
                         body: JSON.stringify({ minutes, seconds })
-                    }, '✅ 타이머 시간을 저장했습니다');
+                    });
                 } catch (e) {
                     const fallback = timerIndex.get(id);
                     if (fallback) {
@@ -1586,7 +1588,7 @@
                         headers: { 'Content-Type': 'application/json', ...authHeaders() },
                         credentials: 'same-origin',
                         body: JSON.stringify({ name: nextName })
-                    }, '✅ 타이머 이름을 저장했습니다');
+                    });
                 } catch (e) {
                     const fallback = timerIndex.get(id);
                     input.value = fallback ? fallback.name : '새 타이머';
@@ -1766,30 +1768,16 @@
             activeView = 'home';
             statusViewInitialized = false;
             timersLoadedOnce = false;
-            timerSnapshot = null;
+            timerData = [];
             timerIndex = new Map();
-            if (timerTickHandle) {
-                clearInterval(timerTickHandle);
-                timerTickHandle = null;
-            }
+            stopTimerTicker();
             if (headerActions) {
                 headerActions.classList.add('hidden');
             }
             Object.values(viewSections).forEach(el => el && el.classList.add('hidden'));
-            if (timerMsg) {
-                hideMsg(timerMsg);
-                if (timerMsgTimeout) {
-                    clearTimeout(timerMsgTimeout);
-                    timerMsgTimeout = null;
-                }
-            }
             if (timerList) {
                 timerList.innerHTML = '<div class="timer-empty">타이머를 추가하면 이곳에 표시됩니다.</div>';
             }
-            if (serverClock) {
-                serverClock.textContent = '--:--:--';
-            }
-            serverOffset = 0;
         }
 
         function showMsg(el, msg, type = '') {
