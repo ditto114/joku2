@@ -42,7 +42,8 @@ export const CONFIG = {
         departureTimes: {
             turn1: { hour: 20, minute: 30 },  // 1트 출발시간 기본값
             turn2: { hour: 21, minute: 30 }   // 2트 출발시간 기본값
-        }
+        },
+        timers: []
     },
 
     // 순번 매핑
