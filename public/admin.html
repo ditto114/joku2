@@ -209,8 +209,9 @@
         let timerData = [];
         let timerIndex = new Map();
         let timerTickHandle = null;
-        let lastTimerTickAt = null;
         let timersLoadedOnce = false;
+        const editingTimers = new Set();
+        let pendingFocusTimerId = null;
 
         function withStorage(fn, fallback) {
             try { return fn(); }
@@ -252,7 +253,6 @@
 
         function ensureTimerTicker() {
             if (timerTickHandle) return;
-            lastTimerTickAt = Date.now();
             timerTickHandle = setInterval(() => updateTimerCountdowns(), 1000);
         }
 
@@ -261,7 +261,6 @@
                 clearInterval(timerTickHandle);
                 timerTickHandle = null;
             }
-            lastTimerTickAt = null;
         }
 
         function activateView(view = 'home') {
@@ -307,6 +306,10 @@
             if (!snapshot || typeof snapshot !== 'object') return;
             const timers = Array.isArray(snapshot.timers) ? snapshot.timers : [];
 
+            const serverNow = Number(snapshot.serverTime);
+            const clientNow = Date.now();
+            const offset = Number.isFinite(serverNow) ? clientNow - serverNow : 0;
+
             const sanitizedTimers = timers
                 .filter(item => item && typeof item === 'object')
                 .map(item => {
@@ -314,19 +317,32 @@
                     if (!id) return null;
                     const durationMs = clampTimerValue(item.durationMs);
                     const remainingMs = clampTimerValue(item.remainingMs);
+                    const startedAt = Number.isFinite(item.startedAt) ? Number(item.startedAt) : null;
+                    const isRunning = Boolean(item.isRunning) && remainingMs > 0;
+                    const clientStart = isRunning
+                        ? (startedAt != null ? startedAt + offset : clientNow - Math.max(0, durationMs - remainingMs))
+                        : null;
                     return {
                         id,
                         name: String(item.name ?? ''),
                         durationMs,
                         remainingMs,
-                        isRunning: Boolean(item.isRunning) && remainingMs > 0,
-                        repeat: Boolean(item.repeat)
+                        isRunning,
+                        repeat: Boolean(item.repeat),
+                        startedAt: isRunning && startedAt != null ? startedAt : null,
+                        _clientStartedAt: isRunning ? clientStart : null,
+                        _lastSyncedAt: clientNow
                     };
                 })
                 .filter(Boolean);
 
             timerData = sanitizedTimers.map(timer => ({ ...timer }));
             timerIndex = new Map(timerData.map(timer => [timer.id, timer]));
+            Array.from(editingTimers).forEach(id => {
+                if (!timerIndex.has(id)) {
+                    editingTimers.delete(id);
+                }
+            });
             renderTimerList();
             updateTimerCountdowns(true);
             timersLoadedOnce = true;
@@ -346,42 +362,73 @@
             }
 
             timerList.innerHTML = timerData.map(renderTimerItem).join('');
+
+            if (pendingFocusTimerId) {
+                requestAnimationFrame(() => {
+                    const target = timerList.querySelector(`[data-timer-id="${pendingFocusTimerId}"] .timer-name`);
+                    if (target) {
+                        target.focus();
+                        if (typeof target.select === 'function') {
+                            target.select();
+                        }
+                    }
+                    pendingFocusTimerId = null;
+                });
+            }
         }
 
         function renderTimerItem(timer) {
             const minutes = Math.floor(timer.durationMs / 60000);
             const seconds = Math.floor((timer.durationMs / 1000) % 60);
-            const state = timer.isRunning && timer.remainingMs > 0
-                ? 'running'
-                : (timer.remainingMs <= 0 ? 'finished' : 'paused');
-            const stateLabel = state === 'running' ? '진행 중' : (state === 'finished' ? '종료' : '대기');
             const remainingDisplay = formatTimerDuration(timer.remainingMs);
             const toggleLabel = timer.isRunning ? '리셋' : '시작';
-            const repeatClass = timer.repeat ? 'btn-repeat is-active' : 'btn-repeat';
+            const repeatActive = Boolean(timer.repeat);
+            const isEditing = editingTimers.has(timer.id);
+            const durationDisplay = `${String(minutes).padStart(2, '0')}분 ${String(seconds).padStart(2, '0')}초`;
+            const progressPercent = timer.durationMs > 0
+                ? Math.max(0, Math.min(100, (timer.remainingMs / timer.durationMs) * 100))
+                : 0;
 
             return `
-                <div class="timer-item" data-timer-id="${escapeAttr(timer.id)}">
-                    <div class="timer-row">
-                        <input type="text" class="timer-name" value="${escapeHtml(timer.name || '')}" placeholder="타이머 이름" />
-                        <div class="timer-controls">
-                            <button type="button" class="btn-primary" data-timer-action="toggle">${toggleLabel}</button>
-                            <button type="button" class="${repeatClass}" data-timer-action="repeat">반복</button>
-                            <button type="button" class="btn-danger" data-timer-action="delete">삭제</button>
+                <div class="timer-item${timer.isRunning ? ' is-running' : ''}" data-timer-id="${escapeAttr(timer.id)}" data-running="${timer.isRunning ? 'true' : 'false'}" data-editing="${isEditing ? 'true' : 'false'}">
+                    <div class="timer-shell">
+                        <div class="timer-main">
+                            <div class="timer-header">
+                                <div class="timer-title-group">
+                                    <span class="timer-repeat-badge${repeatActive ? ' is-active' : ''}" data-role="repeatBadge">반복중</span>
+                                    ${isEditing
+                                        ? `<input type="text" class="timer-name" value="${escapeHtml(timer.name || '')}" placeholder="타이머 이름" />`
+                                        : `<div class="timer-title-text">${escapeHtml(timer.name || '새 타이머')}</div>`}
+                                </div>
+                                <button type="button" class="btn-outline timer-edit-button" data-timer-action="edit">${isEditing ? '완료' : '수정'}</button>
+                            </div>
+                            <div class="timer-display">
+                                <div class="timer-digits" data-role="remaining">${remainingDisplay}</div>
+                            </div>
+                            ${isEditing
+                                ? `<div class="timer-edit-fields">
+                                        <label class="timer-input">
+                                            <span class="timer-input-label">분</span>
+                                            <input type="number" inputmode="numeric" class="timer-minute" min="0" max="720" value="${minutes}" />
+                                        </label>
+                                        <label class="timer-input">
+                                            <span class="timer-input-label">초</span>
+                                            <input type="number" inputmode="numeric" class="timer-second" min="0" max="59" value="${seconds}" />
+                                        </label>
+                                    </div>`
+                                : `<div class="timer-duration-display">
+                                        <span class="timer-duration-label">설정 시간</span>
+                                        <span class="timer-duration-value">${durationDisplay}</span>
+                                    </div>`}
+                            <div class="timer-footer">
+                                <button type="button" class="timer-repeat-button${repeatActive ? ' is-active' : ''}" data-timer-action="repeat">반복</button>
+                                ${isEditing ? `<button type="button" class="btn-danger timer-delete" data-timer-action="delete">삭제</button>` : ''}
+                            </div>
                         </div>
+                        <button type="button" class="timer-cta-panel${timer.isRunning ? ' is-running' : ''}" data-timer-action="toggle">${toggleLabel}</button>
                     </div>
-                    <div class="timer-row">
-                        <div class="timer-config">
-                            <label class="timer-input">
-                                <input type="number" inputmode="numeric" class="timer-minute" min="0" max="720" value="${minutes}" />
-                                <span>분</span>
-                            </label>
-                            <label class="timer-input">
-                                <input type="number" inputmode="numeric" class="timer-second" min="0" max="59" value="${seconds}" />
-                                <span>초</span>
-                            </label>
-                            <span class="timer-state${state === 'running' ? ' is-running' : state === 'finished' ? ' is-finished' : ''}" data-role="state" data-state="${state}">${stateLabel}</span>
-                        </div>
-                        <div class="timer-remaining" data-role="remaining">${remainingDisplay}</div>
+                    <div class="timer-progress">
+                        <div class="timer-progress-bar" data-role="progressBar" style="width: ${progressPercent}%;"></div>
                     </div>
                 </div>`;
         }
@@ -389,39 +436,49 @@
         function updateTimerCountdowns(force = false) {
             if (!timerList || timerIndex.size === 0) return;
             const now = Date.now();
-            if (force || lastTimerTickAt == null) {
-                lastTimerTickAt = now;
-            }
-
-            const delta = force || lastTimerTickAt == null ? 0 : Math.max(0, now - lastTimerTickAt);
-            lastTimerTickAt = now;
 
             timerIndex.forEach(timer => {
                 if (!timer) return;
-                timer.remainingMs = clampTimerValue(timer.remainingMs);
 
-                if (timer.isRunning && delta > 0) {
-                    const duration = clampTimerValue(timer.durationMs);
-                    const baseRemaining = clampTimerValue(timer.remainingMs);
-                    let nextRemaining = baseRemaining - delta;
+                const duration = clampTimerValue(timer.durationMs);
+                const baseRemaining = clampTimerValue(timer.remainingMs);
 
-                    if (nextRemaining <= 0) {
-                        if (timer.repeat && duration > 0) {
-                            const overshoot = Math.abs(nextRemaining);
-                            const remainder = overshoot % duration;
-                            nextRemaining = duration - remainder;
-                            if (remainder === 0) {
+                if (timer.isRunning && duration > 0) {
+                    if (timer._clientStartedAt == null) {
+                        const elapsedSoFar = Math.max(0, duration - baseRemaining);
+                        timer._clientStartedAt = now - elapsedSoFar;
+                    }
+
+                    const elapsed = Math.max(0, now - timer._clientStartedAt);
+
+                    if (timer.repeat) {
+                        if (duration <= 0) {
+                            timer.remainingMs = 0;
+                            timer.isRunning = false;
+                            timer._clientStartedAt = null;
+                        } else {
+                            const remainder = elapsed % duration;
+                            let nextRemaining = duration - remainder;
+                            if (nextRemaining <= 0) {
                                 nextRemaining = duration;
                             }
                             timer.remainingMs = nextRemaining;
+                            timer._clientStartedAt = now - remainder;
                             timer.isRunning = true;
-                        } else {
-                            timer.remainingMs = 0;
-                            timer.isRunning = false;
                         }
                     } else {
-                        timer.remainingMs = nextRemaining;
+                        const nextRemaining = Math.max(0, duration - elapsed);
+                        if (nextRemaining <= 0) {
+                            timer.remainingMs = 0;
+                            timer.isRunning = false;
+                            timer._clientStartedAt = null;
+                        } else {
+                            timer.remainingMs = nextRemaining;
+                        }
                     }
+                } else {
+                    timer.remainingMs = baseRemaining;
+                    timer._clientStartedAt = null;
                 }
 
                 if (!timer.isRunning && timer.remainingMs < 0) {
@@ -436,31 +493,37 @@
                 if (!timer) return;
 
                 const remaining = clampTimerValue(timer.remainingMs);
-                const state = timer.isRunning ? 'running' : (remaining <= 0 ? 'finished' : 'paused');
 
                 const remainingEl = item.querySelector('[data-role="remaining"]');
                 if (remainingEl) {
                     remainingEl.textContent = formatTimerDuration(remaining);
                 }
 
-                const stateEl = item.querySelector('[data-role="state"]');
-                if (stateEl) {
-                    const label = state === 'running' ? '진행 중' : (state === 'finished' ? '종료' : '대기');
-                    stateEl.textContent = label;
-                    stateEl.dataset.state = state;
-                    stateEl.classList.toggle('is-running', state === 'running');
-                    stateEl.classList.toggle('is-finished', state === 'finished');
-                }
-
                 const toggleBtn = item.querySelector('button[data-timer-action="toggle"]');
                 if (toggleBtn) {
                     toggleBtn.textContent = timer.isRunning ? '리셋' : '시작';
+                    toggleBtn.classList.toggle('is-running', timer.isRunning);
                 }
 
                 const repeatBtn = item.querySelector('button[data-timer-action="repeat"]');
                 if (repeatBtn) {
                     repeatBtn.classList.toggle('is-active', Boolean(timer.repeat));
                 }
+
+                const repeatBadge = item.querySelector('[data-role="repeatBadge"]');
+                if (repeatBadge) {
+                    repeatBadge.classList.toggle('is-active', Boolean(timer.repeat));
+                }
+
+                const progressBar = item.querySelector('[data-role="progressBar"]');
+                if (progressBar) {
+                    const duration = clampTimerValue(timer.durationMs);
+                    const percent = duration > 0 ? Math.max(0, Math.min(1, remaining / duration)) * 100 : 0;
+                    progressBar.style.width = `${percent}%`;
+                }
+
+                item.dataset.running = timer.isRunning ? 'true' : 'false';
+                item.classList.toggle('is-running', timer.isRunning);
             });
         }
 
@@ -532,6 +595,35 @@
                 const id = row.getAttribute('data-timer-id');
                 if (!id) return;
                 const action = btn.getAttribute('data-timer-action');
+                if (!action) return;
+
+                if (action === 'edit') {
+                    const isEditing = editingTimers.has(id);
+                    const rowEl = btn.closest('.timer-item');
+                    if (isEditing && rowEl) {
+                        const minuteInput = rowEl.querySelector('.timer-minute');
+                        const secondInput = rowEl.querySelector('.timer-second');
+                        const nameInput = rowEl.querySelector('.timer-name');
+                        if (minuteInput) {
+                            minuteInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        if (secondInput && secondInput !== minuteInput) {
+                            secondInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        if (nameInput) {
+                            nameInput.dispatchEvent(new Event('focusout', { bubbles: true }));
+                        }
+                        editingTimers.delete(id);
+                        pendingFocusTimerId = null;
+                    } else {
+                        editingTimers.add(id);
+                        pendingFocusTimerId = id;
+                    }
+                    renderTimerList();
+                    updateTimerCountdowns(true);
+                    return;
+                }
+
                 if (action === 'delete' && !confirm('선택한 타이머를 삭제하시겠습니까?')) {
                     return;
                 }
