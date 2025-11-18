@@ -9,7 +9,7 @@ index 21e3aa4c67bd19321ea60abff39949d8957713b4..f32ea968b78b58b1e0d5d73ad7842b5b
  <head>
      <meta charset="utf-8" />
      <meta name="viewport" content="width=device-width,initial-scale=1" />
-     <title>조쿠공대 관리페이지</title>
+     <title>카스공대 관리페이지</title>
      <style>
          * {
              box-sizing: border-box;
@@ -734,7 +734,7 @@ index 21e3aa4c67bd19321ea60abff39949d8957713b4..f32ea968b78b58b1e0d5d73ad7842b5b
  <body>
      <header>
          <div class="header-row">
-             <h1>🎮 조쿠공대 관리페이지</h1>
+             <h1>🎮 카스공대 관리페이지</h1>
 -            <div class="btn-group">
 -                <button id="sendScreenshot" class="btn-secondary">🖼️ 화면 전송</button>
 +            <div class="header-actions">

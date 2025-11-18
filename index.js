@@ -387,7 +387,7 @@ app.delete('/api/timers/:id', async (req, res) => {
 });
 
 // ── HTTP + Socket.IO 서버 시작 ────────────────────────────────────────
-const PORT = process.env.PORT || 47984;
+const PORT = process.env.PORT || 3000;
 const httpServer = createServer(app);
 
 // Socket.IO 서버

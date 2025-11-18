@@ -467,7 +467,7 @@ export const generateRecruitmentTemplate = withErrorHandling(async () => {
     const getStatus = (reservation) => checkRecruitmentStatus(reservation);
     const getStatusText = (reservation) => reservation.customer !== '-' ? '마감' : '가능';
 
-    const template = `:fire:조쿠공대 ${ment1}:fire: :one::alarm_clock:${turn1Time.hour} : ${turn1Time.minute === 0 ? '00' : turn1Time.minute} :two::alarm_clock:${turn2Time.hour} : ${turn2Time.minute === 0 ? '00' : turn2Time.minute} :green_circle:가능:x:마감
+    const template = `:fire:카스공대 ${ment1}:fire: :one::alarm_clock:${turn1Time.hour} : ${turn1Time.minute === 0 ? '00' : turn1Time.minute} :two::alarm_clock:${turn2Time.hour} : ${turn2Time.minute === 0 ? '00' : turn2Time.minute} :green_circle:가능:x:마감
 :one:【${getStatus(data.reservations.turn1.first)}/${getStatus(data.reservations.turn1.second)}확투 ${prices.firstSecond}】【${getStatus(data.reservations.turn1.third)}3순 ${prices.third}】【${getStatus(data.reservations.skillbook1)}트스 ${prices.skillbook1}】
 :two:【${getStatus(data.reservations.turn2.first)}/${getStatus(data.reservations.turn2.second)}확투 ${prices.firstSecond}】【${getStatus(data.reservations.skillbook2)}어콤/어차/엔레 ${prices.skillbook2}】 `;
     return template;
